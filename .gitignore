@@ -1,0 +1,15 @@
+# Java build artifacts class files
+*.class
+
+#other generated files
+/.gradle/
+/bin/
+/gen/
+/build/
+/src-gen/
+/target/
+.checkstyle
+.settings
+
+# Log Files
+.testeditor
