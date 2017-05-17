@@ -1,0 +1,18 @@
+package org.testeditor.fixture.host
+
+interaction type connect {
+    template = "Connect to " ${hostname} " with path " s3270Path " and port " ${port}  
+    method = HostDriverFixture.connect(s3270Path, hostname, port)
+}
+
+
+interaction type disconnect {
+    template = "Disconnect"  
+    method = HostDriverFixture.disconnect()
+}
+
+
+component type GeneralHost {
+    interactions = connect, disconnect
+}
+
