@@ -41,7 +41,7 @@ public class Connection {
    * Connects to a mainframe. The s3270 subprocess (which does the communication
    * with the mainframe) is immediately started and connected to the target
    * mainframe.
-   * 
+   *
    * @param s3270Path
    *          the path to your x3270 installation of the s3270 or ws3270.exe
    *          application.
@@ -170,7 +170,7 @@ public class Connection {
       out.flush();
       logger.debug(
           "*****************************************************************************************");
-      logger.debug("---> \"{}\" entered ", command);
+      logger.debug("---> Command sent: \"{}\"", command);
       List<String> lines = new ArrayList<String>();
       readOutput(lines);
       int size = lines.size();
