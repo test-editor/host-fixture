@@ -55,7 +55,6 @@ public class HostDriverFixture {
    * {@link org.testeditor.fixture.host.net.Connection#disconnect()}
    *
    */
-
   @FixtureMethod
   public void disconnect() {
     logger.info("Connection closing ...");
@@ -64,7 +63,7 @@ public class HostDriverFixture {
 
   /**
    * Provides the Status Objekt which will be returned when an input or action
-   * is is
+   * is executed.
    *
    * @return {@link org.testeditor.fixture.host.s3270.Status}
    */
@@ -74,10 +73,29 @@ public class HostDriverFixture {
     return connection.getStatus();
   }
 
+  /**
+   * Provides a possibility to type a value into a specified field through the
+   * parameters row an column.
+   * <p>
+   * Attention! The input field has to be unprotected and not hidden. If they
+   * are, the s3270 emulation will lock further actions.
+   *
+   * @param value
+   *          the value to be typed into the input field of a mainframe window.
+   * @param row
+   *          the row of the input field
+   * @param col
+   *          the column of the input field.
+   */
   @FixtureMethod
   public void typeInto(String value, int row, int col) {
-    // TODO is coming next ;O)
+    setCursorPosition(row, col);
+    connection.doCommand("String(\"" + value + "\")");
+    connection.doCommand("ascii"); // just to see if typed in successfully.
+  }
 
+  private void setCursorPosition(int row, int col) {
+    connection.doCommand("MoveCursor(" + row + "," + col + ")");
   }
 
 }

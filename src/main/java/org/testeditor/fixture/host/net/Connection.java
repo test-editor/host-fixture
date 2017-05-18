@@ -181,7 +181,7 @@ public class Connection {
       out.flush();
       logger.debug(
           "*****************************************************************************************");
-      logger.debug("---> Command sent: \"{}\"", command);
+      logger.debug("---> Command sent: '{}'", command);
       List<String> lines = new ArrayList<String>();
       readOutput(lines);
       int size = lines.size();

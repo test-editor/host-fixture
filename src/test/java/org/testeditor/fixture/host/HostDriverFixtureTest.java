@@ -1,6 +1,8 @@
 package org.testeditor.fixture.host;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
@@ -17,28 +19,27 @@ public class HostDriverFixtureTest {
   private final int MAX_ROWS = 24;
   private final int MAX_COLUMNS = 80;
   private final String STANDARD_WINDOW_ID = "0x0";
+  private final String S2370_PATH = System.getenv("S3270_PATH");
+  private final String hostUrl = System.getenv("HOST_URL");
+  private final int hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
+  HostDriverFixture hdf;
 
-  @Test
-  public void connectionTest() {
-    String S2370_PATH = System.getenv("S3270_PATH");
-    String hostUrl = System.getenv("HOST_URL");
-    int hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
-    HostDriverFixture hdf = new HostDriverFixture();
+  @Before
+  public void init() {
+    hdf = new HostDriverFixture();
     hdf.connect(S2370_PATH, hostUrl, hostPort);
-    hdf.disconnect();
+  }
 
+  @After
+  public void cleanup() {
+    hdf.disconnect();
   }
 
   @Test
   public void statusTest() {
 
     // given
-    String S2370_PATH = System.getenv("S3270_PATH");
-    String hostUrl = System.getenv("HOST_URL");
-    int hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
-
-    HostDriverFixture hdf = new HostDriverFixture();
-    hdf.connect(S2370_PATH, hostUrl, hostPort);
+    // connection has to be established before, nothing else.
 
     // when
     Status status = hdf.getStatus();
@@ -59,8 +60,10 @@ public class HostDriverFixtureTest {
     Assert.assertTrue(status.getCurrentCursorColumn() == STANDARD_COLUMN);
     Assert.assertTrue(status.getWindowId().equals(STANDARD_WINDOW_ID));
     Assert.assertTrue(status.getCommanExecutionTime().equals("-"));
-    hdf.disconnect();
-
   }
 
+  @Test
+  public void typeIntoTest() {
+    hdf.typeInto("äöüßabcdefg", STANDARD_ROW, STANDARD_COLUMN);
+  }
 }
