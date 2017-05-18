@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testeditor.fixture.host.Locator;
 import org.testeditor.fixture.host.s3270.Result;
+import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
@@ -41,7 +42,7 @@ public class Connection {
    * Connects to a mainframe. The s3270 subprocess (which does the communication
    * with the mainframe) is immediately started and connected to the target
    * mainframe.
-   * 
+   *
    * @param s3270Path
    *          the path to your x3270 installation of the s3270 or ws3270.exe
    *          application.
@@ -144,8 +145,10 @@ public class Connection {
     if (s3270Process == null || in == null || out == null) {
       return false;
     } else {
-      final Result r = doCommand("");
-      if (r.getStatus().matches(". . . C.*")) {
+      Result r = doCommand("");
+      createStatus(r);
+
+      if (r.getStatusString().matches(". . . C.*")) {
         return true;
       } else {
         out.println("quit");
@@ -157,6 +160,14 @@ public class Connection {
         return false;
       }
     }
+  }
+
+  private Status createStatus(Result r) {
+    String statusCharacters = r.getStatusString();
+    Status status = new Status(statusCharacters);
+    r.setStatus(status);
+    logger.debug(r.getStatus().toString());
+    return status;
   }
 
   /**
@@ -209,9 +220,17 @@ public class Connection {
     }
   }
 
-  public void getStatus() {
-    // TODO is coming next ;O)
+  public Status getStatus() {
+    return requestStatus();
 
+  }
+
+  private Status requestStatus() {
+    if (s3270Process == null || in == null || out == null) {
+      return null;
+    } else {
+      return createStatus(doCommand(""));
+    }
   }
 
   public void typeInto(String value, Locator locator) {

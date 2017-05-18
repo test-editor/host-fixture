@@ -1,5 +1,7 @@
 package org.testeditor.fixture.host.s3270.options;
 
+import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
+
 /**
  * The model number, which specifies the number of rows and columns.
  * <ul>
@@ -28,4 +30,15 @@ public enum TerminalMode {
   public int getMode() {
     return mode;
   }
+
+  public static TerminalMode getTerminalMode(int input) {
+    TerminalMode[] values = TerminalMode.values();
+    for (TerminalMode terminalMode : values) {
+      if (terminalMode.getMode() == input) {
+        return terminalMode;
+      }
+    }
+    throw new StatusNotFoundException("Terminal mode " + input + " is unknown!");
+  }
+
 }

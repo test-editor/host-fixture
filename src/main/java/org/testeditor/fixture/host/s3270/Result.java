@@ -8,18 +8,27 @@ import java.util.List;
 public class Result {
 
   private final List<String> data;
-  private final String status;
+  private final String statusString;
+  private Status status;
 
-  public Result(final List<String> data, final String status) {
+  public Result(final List<String> data, final String statusString) {
     this.data = data;
-    this.status = status;
+    this.statusString = statusString;
   }
 
   public List<String> getData() {
-    return data;
+    return this.data;
   }
 
-  public String getStatus() {
-    return status;
+  public String getStatusString() {
+    return this.statusString;
+  }
+
+  public Status getStatus() {
+    return this.status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
   }
 }
