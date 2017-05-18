@@ -2,6 +2,7 @@ package org.testeditor.fixture.host;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.interaction.FixtureMethod;
 import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.options.CharacterSet;
@@ -17,7 +18,6 @@ import org.testeditor.fixture.host.s3270.options.TerminalType;
  * @see <a href="http://x3270.bgp.nu/">http://x3270.bgp.nu/</a>
  */
 public class HostDriverFixture {
-
   private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
   private Connection connection;
 
@@ -32,6 +32,7 @@ public class HostDriverFixture {
    * @param port
    *          The port of the host to be connected to.
    */
+  @FixtureMethod
   public void connect(String s3270Path, String hostname, int port) {
     logger.info("Host-Fixture starting ...");
     TerminalType type = TerminalType.TYPE_3279;
@@ -42,9 +43,10 @@ public class HostDriverFixture {
     connection.connect(s3270Path, hostname, port, type, mode, charSet);
     boolean connected = connection.isConnected();
     if (connected) {
-      logger.info("Host-Fixture ready to rock ;O)");
+      logger.info("successfully connected to host='{}', port='{}'", hostname, port);
     } else {
-      logger.info("Host-Fixture is not ready to rock :O(");
+      throw new RuntimeException("The connection to host '" + hostname + "' on port '" + port
+          + "' could not be established.");
     }
   }
 
@@ -53,6 +55,8 @@ public class HostDriverFixture {
    * {@link org.testeditor.fixture.host.net.Connection#disconnect()}
    *
    */
+
+  @FixtureMethod
   public void disconnect() {
     logger.info("Connection closing ...");
     connection.disconnect();
@@ -61,16 +65,19 @@ public class HostDriverFixture {
   /**
    * Provides the Status Objekt which will be returned when an input or action
    * is is
-   * 
+   *
    * @return {@link org.testeditor.fixture.host.s3270.Status}
    */
+  @FixtureMethod
   public Status getStatus() {
     logger.info("get Status ...");
     return connection.getStatus();
   }
 
+  @FixtureMethod
   public void typeInto(String value, int row, int col) {
     // TODO is coming next ;O)
+
   }
 
 }

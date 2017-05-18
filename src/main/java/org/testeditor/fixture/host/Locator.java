@@ -5,13 +5,7 @@ public class Locator {
   private int row;
   private int col;
 
-  /**
-   *
-   * @param rol
-   * @param row
-   */
   public Locator(int col, int row) {
-
     this.setRow(row);
     this.setCol(col);
   }

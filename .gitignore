@@ -1,15 +1,31 @@
-# Java build artifacts class files
-*.class
-
-#other generated files
-/.gradle/
-/bin/
-/gen/
-/build/
-/src-gen/
-/target/
+### Eclipse ###
+.classpath
 .checkstyle
-.settings
+.project
+.settings/
+.metadata/
+bin/
 
-# Log Files
+### IntelliJ ###
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+### Gradle ###
+.gradle/
+build/
+!gradle-wrapper.jar
+
+### Xtend ###
+xtend-gen/
+
+### Emacs ###
+*~
+\#*\#
+.\#*
+.projectile
+
+### Log Files ###
 .testeditor
