@@ -80,7 +80,7 @@ public class Connection {
     /**
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
      */
-    public void disconnect() {
+    public boolean disconnect() {
         processAvailable();
         doQuit();
         stop2370Process();
@@ -96,6 +96,7 @@ public class Connection {
         }
         cleanup();
         logger.info("Disconnected successfully from host : {} ", hostname);
+        return isConnected();
     }
 
     /**

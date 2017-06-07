@@ -1,19 +1,24 @@
 package org.testeditor.fixture.host;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 
 public class HostDriverFixtureTest {
 
-  @Test
-  public void connectionTest() {
-    String S2370_PATH = System.getenv("S3270_PATH");
-    String hostUrl = System.getenv("HOST_URL");
-    int hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
+    @Test
+    public void connectionTest() {
+        String S2370_PATH = "S3270_PATH";
+        String hostUrl = "HOST_URL";
+        int hostPort = 1234;
 
-    HostDriverFixture hdf = new HostDriverFixture();
-    hdf.connect(S2370_PATH, hostUrl, hostPort);
-    hdf.disconnect();
+        HostDriverFixture hdf = mock(HostDriverFixture.class);
+        when(hdf.connect(S2370_PATH, hostUrl, hostPort)).thenReturn(true);
+        assertEquals(hdf.connect(S2370_PATH, hostUrl, hostPort), true);
+        hdf.disconnect();
 
-  }
+    }
 
 }
