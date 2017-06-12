@@ -1,0 +1,96 @@
+plugins {
+    id 'maven'
+    id 'java'
+    id 'com.jfrog.bintray' version '1.7.2'
+    id 'net.researchgate.release' version '2.4.1'
+    id 'org.xtext.xtend' version '1.0.17'
+}
+
+repositories {
+    jcenter()
+}
+
+group = 'org.testeditor.fixture.host'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+// show standard out during test to see logging output
+test.testLogging.showStandardStreams = true
+
+
+dependencies {
+    compile 'org.testeditor.fixture:core-fixture:3.1.0'
+    compile 'com.mashape.unirest:unirest-java:1.4.9'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.google.guava:guava:21.0'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.7.22'
+    testCompile 'com.github.tomakehurst:wiremock:2.6.0'
+    testCompile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.11.0'
+    testCompile 'com.google.truth:truth:0.31'
+}
+    
+sourceSets.main.resources.srcDirs = [ "src/main/java" ]
+sourceSets.main.resources.includes = [ "**/*.aml" ]    
+ 
+// TODO code below copied from core-fixture
+jar {
+    manifest {
+        attributes 'Implementation-Title': "${project.group}.${project.name}",
+                   'Implementation-Version': project.version
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.packaging = 'jar'
+    }
+}
+
+/*
+ * Configure release plugin.
+ * Remove tasks "updateVersion" and "commitNewVersion" as we don't want the new SNAPSHOT
+ * version commit on the master branch.
+ */
+tasks.release.tasks -= ["updateVersion", "commitNewVersion"]
+release {
+    preTagCommitMessage = '[release]'
+    tagCommitMessage = '[release]'
+    newVersionCommitMessage = '[release] new version'
+    tagTemplate = 'v${version}'
+}
+
+afterReleaseBuild.dependsOn bintrayUpload
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    configurations = ['archives']
+    publish = true 
+    pkg {
+        repo = 'Fixtures'
+        name = project.name
+        userOrg = 'test-editor'
+        websiteUrl = 'http://testeditor.org'
+        vcsUrl = "https://github.com/test-editor/${project.name}.git"
+        licenses = ['EPL-1.0']
+    }
+}
+
+bintrayUpload.doFirst {
+    // Version is changed during release, we need to set the proper version right before uploading
+    versionName = "$project.version"
+    versionVcsTag = "v$project.version"
+}    
+
+
