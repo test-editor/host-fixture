@@ -83,9 +83,9 @@ public class Connection {
      * @return true if disconnected succesfull, false otherwise.
      */
     public boolean disconnect() {
-        processAvailable();
+        assertProcessAvailable();
         doQuit();
-        stop2370Process();
+        stop3270Process();
         try {
             s3270Process.waitFor(5, TimeUnit.SECONDS);
         } catch (final InterruptedException ex) {
@@ -97,8 +97,13 @@ public class Connection {
             logger.error("Something went wrong during closing InputStreamreader of s2370 process");
         }
         cleanup();
-        logger.info("Disconnected successfully from host : {} ", hostname);
-        return !isConnected();
+        boolean success = !isConnected();
+        if (success) {
+            logger.info("Disconnected successfully from host : {} ", hostname);
+        } else {
+            logger.info("Discoonection failed");
+        }
+        return success;
     }
 
     /**
@@ -122,16 +127,16 @@ public class Connection {
     /**
      * stop the s3270 process
      */
-    private void stop2370Process() {
+    private void stop3270Process() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     Thread.sleep(1000);
-                } catch (final InterruptedException ex) {
                     if (s3270Process != null) {
-                        s3270Process.destroy();
+                        s3270Process.destroy(); // May run into TimeOut
                     }
+                } catch (final InterruptedException ex) {
                     if (s3270Process != null) {
                         s3270Process.destroy();
                     }
@@ -154,8 +159,7 @@ public class Connection {
             if (r.getStatus().matches(". . . C.*")) {
                 return true;
             } else {
-                out.println("quit");
-                out.flush();
+                doQuit();
                 s3270Process.destroy();
                 s3270Process = null;
                 in = null;
@@ -170,14 +174,13 @@ public class Connection {
      * communication with s3270 will be accessed through this method.
      */
     public Result doCommand(final String command) {
-        processAvailable();
+        assertProcessAvailable();
         try {
             out.println(command);
             out.flush();
             logger.debug("*****************************************************************************************");
             logger.debug("---> Command sent: \"{}\"", command);
-            List<String> lines = new ArrayList<String>();
-            readOutput(lines);
+            List<String> lines = readOutput();
             int size = lines.size();
             if (size > 0) {
                 Result result = new Result(lines.subList(0, size - 1), lines.get(size - 1));
@@ -192,7 +195,8 @@ public class Connection {
         }
     }
 
-    private void readOutput(List<String> lines) throws IOException {
+    private List<String> readOutput() throws IOException {
+        List<String> lines = new ArrayList<String>();
         while (true) {
             String line = in.readLine();
             if (line == null) {
@@ -206,9 +210,10 @@ public class Connection {
             }
             lines.add(line);
         }
+        return lines;
     }
 
-    private void processAvailable() {
+    private void assertProcessAvailable() {
         if (s3270Process == null) {
             throw new RuntimeException("No Connection available!");
         }

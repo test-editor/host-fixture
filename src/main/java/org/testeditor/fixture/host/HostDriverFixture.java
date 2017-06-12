@@ -12,7 +12,15 @@ import org.slf4j.LoggerFactory;
 public class HostDriverFixture {
     private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
 
-    private Connection connection = new Connection();;
+    private Connection connection;
+
+    public HostDriverFixture() {
+        this.connection = new Connection();
+    }
+
+    public HostDriverFixture(Connection connection) {
+        this.connection = connection;
+    }
 
     /**
      *
@@ -22,7 +30,7 @@ public class HostDriverFixture {
      */
     @FixtureMethod
     public boolean connect(String s3270Path, String hostname, int port) {
-        logger.info("Host-Fixture starting ...");
+        logger.info("Host-Fixture connecting ...");
         TerminalType type = TerminalType.TYPE_3279;
         TerminalMode mode = TerminalMode.MODE_24x80;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
@@ -32,8 +40,8 @@ public class HostDriverFixture {
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
         } else {
-            throw new RuntimeException(
-                    "The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
+            logger.info("The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
+            return false;
         }
     }
 
