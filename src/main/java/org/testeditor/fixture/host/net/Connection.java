@@ -79,6 +79,8 @@ public class Connection {
 
     /**
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
+     * 
+     * @return true if disconnected succesfull, false otherwise.
      */
     public boolean disconnect() {
         processAvailable();
@@ -96,7 +98,7 @@ public class Connection {
         }
         cleanup();
         logger.info("Disconnected successfully from host : {} ", hostname);
-        return isConnected();
+        return !isConnected();
     }
 
     /**
@@ -126,10 +128,10 @@ public class Connection {
             public void run() {
                 try {
                     Thread.sleep(1000);
+                } catch (final InterruptedException ex) {
                     if (s3270Process != null) {
                         s3270Process.destroy();
                     }
-                } catch (final InterruptedException ex) {
                     if (s3270Process != null) {
                         s3270Process.destroy();
                     }

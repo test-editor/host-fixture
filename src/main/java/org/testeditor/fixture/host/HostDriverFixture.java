@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class HostDriverFixture {
     private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
 
-    private Connection connection;
+    private Connection connection = new Connection();;
 
     /**
      *
@@ -26,8 +26,6 @@ public class HostDriverFixture {
         TerminalType type = TerminalType.TYPE_3279;
         TerminalMode mode = TerminalMode.MODE_24x80;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
-
-        connection = new Connection();
         connection.connect(s3270Path, hostname, port, type, mode, charSet);
         boolean connected = connection.isConnected();
         if (connected) {
@@ -42,7 +40,7 @@ public class HostDriverFixture {
     @FixtureMethod
     public boolean disconnect() {
         logger.info("Connection closing ...");
-        return !connection.disconnect();
+        return connection.disconnect();
     }
 
     @FixtureMethod

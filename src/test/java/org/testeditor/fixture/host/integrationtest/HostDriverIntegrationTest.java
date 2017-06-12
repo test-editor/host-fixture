@@ -3,10 +3,11 @@ package org.testeditor.fixture.host.integrationtest;
 import org.testeditor.fixture.host.HostDriverFixture;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 
 public class HostDriverIntegrationTest {
 
-    // @Test
+    @Ignore("manual execution only in special environments")
     /**
      * This integrationtest is only for a special environment and not for
      * executing in a gradle test environment. You can uncomment the

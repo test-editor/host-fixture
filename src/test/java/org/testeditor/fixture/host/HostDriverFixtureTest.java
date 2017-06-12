@@ -18,7 +18,6 @@ public class HostDriverFixtureTest {
         when(hdf.connect(S2370_PATH, hostUrl, hostPort)).thenReturn(true);
         assertEquals(hdf.connect(S2370_PATH, hostUrl, hostPort), true);
         hdf.disconnect();
-
     }
 
 }
