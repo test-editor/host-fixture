@@ -2,6 +2,7 @@ package org.testeditor.fixture.host.net;
 
 import org.testeditor.fixture.host.Locator;
 import org.testeditor.fixture.host.s3270.Result;
+import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
@@ -17,15 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-<<<<<<< HEAD
-import org.testeditor.fixture.host.Locator;
-import org.testeditor.fixture.host.s3270.Result;
-import org.testeditor.fixture.host.s3270.Status;
-import org.testeditor.fixture.host.s3270.options.CharacterSet;
-import org.testeditor.fixture.host.s3270.options.TerminalMode;
-import org.testeditor.fixture.host.s3270.options.TerminalType;
-=======
->>>>>>> feature/newStructure
 
 public class Connection {
 
@@ -100,31 +92,6 @@ public class Connection {
         } catch (final InterruptedException ex) {
             logger.error("Something went wrong during termination of s2370 process");
         }
-<<<<<<< HEAD
-      }
-    }).start();
-  }
-
-  /**
-   *
-   * @return true if connection is established to mainframe through s3270/ws3270
-   *         emulation and process is still running, false otherwise.
-   */
-  public boolean isConnected() {
-    if (s3270Process == null || in == null || out == null) {
-      return false;
-    } else {
-      Result r = doCommand("");
-      createStatus(r);
-
-      if (r.getStatusString().matches(". . . C.*")) {
-        return true;
-      } else {
-        out.println("quit");
-        out.flush();
-        s3270Process.destroy();
-        s3270Process = null;
-=======
         try {
             in.close();
         } catch (final IOException ex) {
@@ -141,11 +108,45 @@ public class Connection {
     }
 
     /**
+     *
+     * @return true if connection is established to mainframe through
+     *         s3270/ws3270 emulation and process is still running, false
+     *         otherwise.
+     */
+    public boolean isConnected() {
+        if (s3270Process == null || in == null || out == null) {
+            return false;
+        } else {
+            Result r = doCommand("");
+            createStatus(r);
+            if (r.getStatusString().matches(". . . C.*")) {
+                return true;
+            } else {
+                doQuit();
+                s3270Process.destroy();
+                s3270Process = null;
+                try {
+                    in.close();
+                } catch (final IOException ex) {
+                    logger.error("Something went wrong during closing InputStreamreader of s2370 process");
+                }
+                cleanup();
+                boolean success = !isConnected();
+                if (success) {
+                    logger.info("Disconnected successfully from host : {} ", hostname);
+                } else {
+                    logger.info("Discoonection failed");
+                }
+                return success;
+            }
+        }
+    }
+
+    /**
      * reset all opened streams
      */
     private void cleanup() {
         out.close();
->>>>>>> feature/newStructure
         in = null;
         out = null;
         s3270Process = null;
@@ -179,67 +180,13 @@ public class Connection {
             }
         }).start();
     }
-<<<<<<< HEAD
-  }
 
-  private Status createStatus(Result r) {
-    String statusCharacters = r.getStatusString();
-    Status status = new Status(statusCharacters);
-    r.setStatus(status);
-    logger.debug(r.getStatus().toString());
-    return status;
-  }
-
-  /**
-   * A s3270 command will be executed with this method. The whole communication
-   * with s3270 will be accessed through this method.
-   */
-  public Result doCommand(final String command) {
-    processAvailable();
-    try {
-      out.println(command);
-      out.flush();
-      logger.debug(
-          "*****************************************************************************************");
-      logger.debug("---> Command sent: \"{}\"", command);
-      List<String> lines = new ArrayList<String>();
-      readOutput(lines);
-      int size = lines.size();
-      if (size > 0) {
-        Result result = new Result(lines.subList(0, size - 1), lines.get(size - 1));
-        logger.debug(
-            "*****************************************************************************************");
-        return result;
-      } else {
-        throw new RuntimeException("no status received in command: " + command);
-      }
-    } catch (final IOException ex) {
-      throw new RuntimeException("IOException during command: " + command, ex);
-=======
-
-    /**
-     *
-     * @return true if connection is established to mainframe through
-     *         s3270/ws3270 emulation and process is still running, false
-     *         otherwise.
-     */
-    public boolean isConnected() {
-        if (s3270Process == null || in == null || out == null) {
-            return false;
-        } else {
-            final Result r = doCommand("");
-            if (r.getStatus().matches(". . . C.*")) {
-                return true;
-            } else {
-                doQuit();
-                s3270Process.destroy();
-                s3270Process = null;
-                in = null;
-                out = null;
-                return false;
-            }
-        }
->>>>>>> feature/newStructure
+    private Status createStatus(Result r) {
+        String statusCharacters = r.getStatusString();
+        Status status = new Status(statusCharacters);
+        r.setStatus(status);
+        logger.debug(r.getStatus().toString());
+        return status;
     }
 
     /**
@@ -286,34 +233,23 @@ public class Connection {
         return lines;
     }
 
-<<<<<<< HEAD
-  public Status getStatus() {
-    return requestStatus();
-=======
+    public Status getStatus() {
+        return requestStatus();
+    }
+
     private void assertProcessAvailable() {
         if (s3270Process == null) {
             throw new RuntimeException("No Connection available!");
         }
     }
->>>>>>> feature/newStructure
 
-    public void getStatus() {
-        // TODO is coming next ;O)
-
-<<<<<<< HEAD
-  private Status requestStatus() {
-    if (s3270Process == null || in == null || out == null) {
-      return null;
-    } else {
-      return createStatus(doCommand(""));
+    private Status requestStatus() {
+        if (s3270Process == null || in == null || out == null) {
+            return null;
+        } else {
+            return createStatus(doCommand(""));
+        }
     }
-  }
-
-  public void typeInto(String value, Locator locator) {
-    // TODO is coming next ;O)
-=======
-    }
->>>>>>> feature/newStructure
 
     public void typeInto(String value, Locator locator) {
         // TODO is coming next ;O)
