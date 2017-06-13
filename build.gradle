@@ -25,7 +25,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.google.guava:guava:21.0'
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.3.9'
+    testCompile 'org.mockito:mockito-core:2.7.22'
     testCompile 'com.github.tomakehurst:wiremock:2.6.0'
     testCompile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.11.0'
     testCompile 'com.google.truth:truth:0.31'

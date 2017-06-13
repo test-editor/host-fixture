@@ -7,28 +7,29 @@ import java.util.List;
  */
 public class Result {
 
-  private final List<String> data;
-  private final String statusString;
-  private Status status;
+    private final List<String> dataLines;
+    private final String statusString;
+    private Status status;
 
-  public Result(final List<String> data, final String statusString) {
-    this.data = data;
-    this.statusString = statusString;
-  }
+    public Result(final List<String> dataLines, final String statusString) {
+        this.dataLines = dataLines;
+        this.statusString = statusString;
+    }
 
-  public List<String> getData() {
-    return this.data;
-  }
+    public List<String> getDataLines() {
+        return this.dataLines;
+    }
 
-  public String getStatusString() {
-    return this.statusString;
-  }
+    public String getStatusString() {
+        return this.statusString;
+    }
 
-  public Status getStatus() {
-    return this.status;
-  }
+    public Status getStatus() {
+        return this.status;
+    }
 
-  public void setStatus(Status status) {
-    this.status = status;
-  }
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
 }
