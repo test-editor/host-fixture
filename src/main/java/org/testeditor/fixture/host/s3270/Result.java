@@ -7,6 +7,7 @@ import java.util.List;
  */
 public class Result {
 
+<<<<<<< HEAD
   private final List<String> data;
   private final String statusString;
   private Status status;
@@ -31,4 +32,21 @@ public class Result {
   public void setStatus(Status status) {
     this.status = status;
   }
+=======
+    private final List<String> dataLines;
+    private final String status;
+
+    public Result(final List<String> dataLines, final String status) {
+        this.dataLines = dataLines;
+        this.status = status;
+    }
+
+    public List<String> getDataLines() {
+        return dataLines;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+>>>>>>> feature/newStructure
 }
