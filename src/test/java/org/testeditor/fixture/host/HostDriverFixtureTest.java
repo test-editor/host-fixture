@@ -54,4 +54,33 @@ public class HostDriverFixtureTest {
         Assert.assertFalse(connected);
     }
 
+    @Test
+    public void diconnectionSuccessfulTest() {
+
+        // given
+        Connection con = mock(Connection.class);
+        HostDriverFixture hdf = new HostDriverFixture(con);
+        when(con.disconnect()).thenReturn(true);
+
+        // when
+        boolean disconnected = hdf.disconnect();
+
+        // then
+        Assert.assertTrue(disconnected);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void diconnectionUnsuccessfulTest() {
+
+        // given
+        Connection con = new Connection();
+        HostDriverFixture hdf = new HostDriverFixture(con);
+
+        // when
+        boolean disconnected = hdf.disconnect();
+
+        // then
+        Assert.assertTrue(disconnected);
+    }
+
 }
