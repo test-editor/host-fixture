@@ -18,27 +18,25 @@ import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
  *
  */
 public enum EmulatorMode {
-  M3270_MODE("I"), NVT_LINE_MODE("L"), NVT_CHAR_MODE("C"), UNNEGOTIATED_MODE("P"), NOT_CONNECTED(
-      "N");
-  private String mode;
+    M3270_MODE("I"), NVT_LINE_MODE("L"), NVT_CHAR_MODE("C"), UNNEGOTIATED_MODE("P"), NOT_CONNECTED("N");
+    private String mode;
 
-  private EmulatorMode(String mode) {
-    this.mode = mode;
-  }
-
-  public String getMode() {
-    return mode;
-  }
-
-  public static EmulatorMode getEmulatorMode(String input) {
-    EmulatorMode[] values = EmulatorMode.values();
-    for (EmulatorMode emulatorMode : values) {
-      if (emulatorMode.getMode().equals(input)) {
-        return emulatorMode;
-      }
+    private EmulatorMode(String mode) {
+        this.mode = mode;
     }
-    throw new StatusNotFoundException("Emulator mode " + input + " is unknown!");
 
-  }
+    public String getMode() {
+        return mode;
+    }
+
+    public static EmulatorMode getEmulatorMode(String input) {
+        EmulatorMode[] values = EmulatorMode.values();
+        for (EmulatorMode emulatorMode : values) {
+            if (emulatorMode.getMode().equals(input)) {
+                return emulatorMode;
+            }
+        }
+        throw new StatusNotFoundException("Emulator mode " + input + " is unknown!");
+    }
 
 }

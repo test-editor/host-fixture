@@ -8,6 +8,9 @@ import org.testeditor.fixture.host.s3270.statusformat.FieldProtection;
 import org.testeditor.fixture.host.s3270.statusformat.KeyboardState;
 import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The returned status Information from s3270/ws3270 application after execution
  * of a s3270 command. It consists of 2 lines. The first line represents the
@@ -23,328 +26,330 @@ import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
  */
 public class Status {
 
-  private KeyboardState keyboardState;
-  private ScreenFormatting screenFormatting;
-  private FieldProtection fieldProtection;
-  private ConnectionState connectionState;
-  private EmulatorMode emulatorMode;
-  private TerminalMode mode;
-  private int numberRows;
-  private int numberColumns;
-  private int currentCursorRow;
-  private int currentCursorColumn;
-  private String windowId;
-  private String commanExecutionTime;
+    private static final Logger logger = LoggerFactory.getLogger(Status.class);
 
-  public Status(String status) {
-    createStatus(status);
-  }
+    private KeyboardState keyboardState;
+    private ScreenFormatting screenFormatting;
+    private FieldProtection fieldProtection;
+    private ConnectionState connectionState;
+    private EmulatorMode emulatorMode;
+    private TerminalMode mode;
+    private int numberRows;
+    private int numberColumns;
+    private int currentCursorRow;
+    private int currentCursorColumn;
+    private String windowId;
+    private String executionTimeString;
 
-  private void createStatus(String status) {
-    String[] splittedStatus = status.split(" ");
-    createKeyBoardState(splittedStatus[0]);
-    createScreenFormatting(splittedStatus[1]);
-    createFieldProtection(splittedStatus[2]);
-    createConnectionState(splittedStatus[3]);
-    createEmulatorMode(splittedStatus[4]);
-    createModelNumber(splittedStatus[5]);
-    createNumberOfRows(splittedStatus[6]);
-    createNumberOfColumns(splittedStatus[7]);
-    createCursorRow(splittedStatus[8]);
-    createCursorColumn(splittedStatus[9]);
-    createWindowId(splittedStatus[10]);
-    createCommandExecutionTime(splittedStatus[11]);
-  }
-
-  private void createKeyBoardState(String input) {
-    try {
-      setKeyboardState(KeyboardState.getKeyboardState(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    public Status(String status) {
+        createStatus(status);
     }
-  }
 
-  private void createScreenFormatting(String input) {
-    try {
-      setScreenFormatting(ScreenFormatting.getScreenFormatting(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createStatus(String status) {
+        String[] splittedStatus = status.split(" ");
+        createKeyBoardState(splittedStatus[0]);
+        createScreenFormatting(splittedStatus[1]);
+        createFieldProtection(splittedStatus[2]);
+        createConnectionState(splittedStatus[3]);
+        createEmulatorMode(splittedStatus[4]);
+        createModelNumber(splittedStatus[5]);
+        createNumberOfRows(splittedStatus[6]);
+        createNumberOfColumns(splittedStatus[7]);
+        createCursorRow(splittedStatus[8]);
+        createCursorColumn(splittedStatus[9]);
+        createWindowId(splittedStatus[10]);
+        createCommandExecutionTime(splittedStatus[11]);
     }
-  }
 
-  private void createFieldProtection(String input) {
-    try {
-      setFieldProtection(FieldProtection.getFieldProtection(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createKeyBoardState(String input) {
+        try {
+            setKeyboardState(KeyboardState.getKeyboardState(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createConnectionState(String input) {
-    try {
-      String a = input.substring(0, 1);
-      setConnectionState(ConnectionState.getConnectionState(a));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createScreenFormatting(String input) {
+        try {
+            setScreenFormatting(ScreenFormatting.getScreenFormatting(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createEmulatorMode(String input) {
-    try {
-      setEmulatorMode(EmulatorMode.getEmulatorMode(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createFieldProtection(String input) {
+        try {
+            setFieldProtection(FieldProtection.getFieldProtection(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createModelNumber(String input) {
-    try {
-      setMode(TerminalMode.getTerminalMode(Integer.parseInt(input)));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createConnectionState(String input) {
+        try {
+            String a = input.substring(0, 1);
+            setConnectionState(ConnectionState.getConnectionState(a));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createNumberOfRows(String input) {
-    try {
-      setNumberRows(Integer.parseInt(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createEmulatorMode(String input) {
+        try {
+            setEmulatorMode(EmulatorMode.getEmulatorMode(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createNumberOfColumns(String input) {
-    try {
-      setNumberColumns(Integer.parseInt(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createModelNumber(String input) {
+        try {
+            setMode(TerminalMode.getTerminalMode(Integer.parseInt(input)));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createCursorRow(String input) {
-    try {
-      setCurrentCursorRow(Integer.parseInt(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createNumberOfRows(String input) {
+        try {
+            setNumberRows(Integer.parseInt(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createCursorColumn(String input) {
-    try {
-      setCurrentCursorColumn(Integer.parseInt(input));
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createNumberOfColumns(String input) {
+        try {
+            setNumberColumns(Integer.parseInt(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createWindowId(String input) {
-    try {
-      setWindowId(input);
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createCursorRow(String input) {
+        try {
+            setCurrentCursorRow(Integer.parseInt(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  private void createCommandExecutionTime(String input) {
-    try {
-      setCommanExecutionTime(input);
-    } catch (StatusNotFoundException e) {
-      throw new StatusNotFoundException(e.getMessage());
+    private void createCursorColumn(String input) {
+        try {
+            setCurrentCursorColumn(Integer.parseInt(input));
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
     }
-  }
 
-  /**
-   * @return the keyboardState
-   */
-  public KeyboardState getKeyboardState() {
-    return keyboardState;
-  }
+    private void createWindowId(String input) {
+        try {
+            setWindowId(input);
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
+    }
 
-  /**
-   * @param keyboardState
-   *          the keyboardState to set
-   */
-  public void setKeyboardState(KeyboardState keyboardState) {
-    this.keyboardState = keyboardState;
-  }
+    private void createCommandExecutionTime(String input) {
+        try {
+            setCommanExecutionTime(input);
+        } catch (StatusNotFoundException e) {
+            logger.error(e.getMessage());
+        }
+    }
 
-  /**
-   * @return the screenFormatting
-   */
-  public ScreenFormatting getScreenFormatting() {
-    return screenFormatting;
-  }
+    /**
+     * @return the keyboardState
+     */
+    public KeyboardState getKeyboardState() {
+        return keyboardState;
+    }
 
-  /**
-   * @param screenFormatting
-   *          the screenFormatting to set
-   */
-  public void setScreenFormatting(ScreenFormatting screenFormatting) {
-    this.screenFormatting = screenFormatting;
-  }
+    /**
+     * @param keyboardState
+     *            the keyboardState to set
+     */
+    public void setKeyboardState(KeyboardState keyboardState) {
+        this.keyboardState = keyboardState;
+    }
 
-  /**
-   * @return the fieldProtection
-   */
-  public FieldProtection getFieldProtection() {
-    return fieldProtection;
-  }
+    /**
+     * @return the screenFormatting
+     */
+    public ScreenFormatting getScreenFormatting() {
+        return screenFormatting;
+    }
 
-  /**
-   * @param fieldProtection
-   *          the fieldProtection to set
-   */
-  public void setFieldProtection(FieldProtection fieldProtection) {
-    this.fieldProtection = fieldProtection;
-  }
+    /**
+     * @param screenFormatting
+     *            the screenFormatting to set
+     */
+    public void setScreenFormatting(ScreenFormatting screenFormatting) {
+        this.screenFormatting = screenFormatting;
+    }
 
-  /**
-   * @return the connectionState
-   */
-  public ConnectionState getConnectionState() {
-    return connectionState;
-  }
+    /**
+     * @return the fieldProtection
+     */
+    public FieldProtection getFieldProtection() {
+        return fieldProtection;
+    }
 
-  /**
-   * @param connectionState
-   *          the connectionState to set
-   */
-  public void setConnectionState(ConnectionState connectionState) {
-    this.connectionState = connectionState;
-  }
+    /**
+     * @param fieldProtection
+     *            the fieldProtection to set
+     */
+    public void setFieldProtection(FieldProtection fieldProtection) {
+        this.fieldProtection = fieldProtection;
+    }
 
-  /**
-   * @return the emulatorMode
-   */
-  public EmulatorMode getEmulatorMode() {
-    return emulatorMode;
-  }
+    /**
+     * @return the connectionState
+     */
+    public ConnectionState getConnectionState() {
+        return connectionState;
+    }
 
-  /**
-   * @param emulatorMode
-   *          the emulatorMode to set
-   */
-  public void setEmulatorMode(EmulatorMode emulatorMode) {
-    this.emulatorMode = emulatorMode;
-  }
+    /**
+     * @param connectionState
+     *            the connectionState to set
+     */
+    public void setConnectionState(ConnectionState connectionState) {
+        this.connectionState = connectionState;
+    }
 
-  /**
-   * @return the mode
-   */
-  public TerminalMode getMode() {
-    return mode;
-  }
+    /**
+     * @return the emulatorMode
+     */
+    public EmulatorMode getEmulatorMode() {
+        return emulatorMode;
+    }
 
-  /**
-   * @param mode
-   *          the mode to set
-   */
-  public void setMode(TerminalMode mode) {
-    this.mode = mode;
-  }
+    /**
+     * @param emulatorMode
+     *            the emulatorMode to set
+     */
+    public void setEmulatorMode(EmulatorMode emulatorMode) {
+        this.emulatorMode = emulatorMode;
+    }
 
-  /**
-   * @return the numberRows
-   */
-  public int getNumberRows() {
-    return numberRows;
-  }
+    /**
+     * @return the mode
+     */
+    public TerminalMode getMode() {
+        return mode;
+    }
 
-  /**
-   * @param numberRows
-   *          the numberRows to set
-   */
-  public void setNumberRows(int numberRows) {
-    this.numberRows = numberRows;
-  }
+    /**
+     * @param mode
+     *            the mode to set
+     */
+    public void setMode(TerminalMode mode) {
+        this.mode = mode;
+    }
 
-  /**
-   * @return the numberColumns
-   */
-  public int getNumberColumns() {
-    return numberColumns;
-  }
+    /**
+     * @return the numberRows
+     */
+    public int getNumberRows() {
+        return numberRows;
+    }
 
-  /**
-   * @param numberColumns
-   *          the numberColumns to set
-   */
-  public void setNumberColumns(int numberColumns) {
-    this.numberColumns = numberColumns;
-  }
+    /**
+     * @param numberRows
+     *            the numberRows to set
+     */
+    public void setNumberRows(int numberRows) {
+        this.numberRows = numberRows;
+    }
 
-  /**
-   * @return the currentCursorRow
-   */
-  public int getCurrentCursorRow() {
-    return currentCursorRow;
-  }
+    /**
+     * @return the numberColumns
+     */
+    public int getNumberColumns() {
+        return numberColumns;
+    }
 
-  /**
-   * @param currentCursorRow
-   *          the currentCursorRow to set
-   */
-  public void setCurrentCursorRow(int currentCursorRow) {
-    this.currentCursorRow = currentCursorRow;
-  }
+    /**
+     * @param numberColumns
+     *            the numberColumns to set
+     */
+    public void setNumberColumns(int numberColumns) {
+        this.numberColumns = numberColumns;
+    }
 
-  /**
-   * @return the currentCursorColumn
-   */
-  public int getCurrentCursorColumn() {
-    return currentCursorColumn;
-  }
+    /**
+     * @return the currentCursorRow
+     */
+    public int getCurrentCursorRow() {
+        return currentCursorRow;
+    }
 
-  /**
-   * @param currentCursorColumn
-   *          the currentCursorColumn to set
-   */
-  public void setCurrentCursorColumn(int currentCursorColumn) {
-    this.currentCursorColumn = currentCursorColumn;
-  }
+    /**
+     * @param currentCursorRow
+     *            the currentCursorRow to set
+     */
+    public void setCurrentCursorRow(int currentCursorRow) {
+        this.currentCursorRow = currentCursorRow;
+    }
 
-  /**
-   * @return the windowId
-   */
-  public String getWindowId() {
-    return windowId;
-  }
+    /**
+     * @return the currentCursorColumn
+     */
+    public int getCurrentCursorColumn() {
+        return currentCursorColumn;
+    }
 
-  /**
-   * @param windowId
-   *          the windowId to set
-   */
-  public void setWindowId(String windowId) {
-    this.windowId = windowId;
-  }
+    /**
+     * @param currentCursorColumn
+     *            the currentCursorColumn to set
+     */
+    public void setCurrentCursorColumn(int currentCursorColumn) {
+        this.currentCursorColumn = currentCursorColumn;
+    }
 
-  /**
-   * @return the commanExecutionTime
-   */
-  public String getCommanExecutionTime() {
-    return commanExecutionTime;
-  }
+    /**
+     * @return the windowId
+     */
+    public String getWindowId() {
+        return windowId;
+    }
 
-  /**
-   * @param commanExecutionTime
-   *          the commanExecutionTime to set
-   */
-  public void setCommanExecutionTime(String commanExecutionTime) {
-    this.commanExecutionTime = commanExecutionTime;
-  }
+    /**
+     * @param windowId
+     *            the windowId to set
+     */
+    public void setWindowId(String windowId) {
+        this.windowId = windowId;
+    }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    return "Status [keyboardState=\"" + keyboardState + "\", screenFormatting=\"" + screenFormatting
-        + "\", fieldProtection=\"" + fieldProtection + "\", connectionState=\"" + connectionState
-        + "\", emulatorMode=\"" + emulatorMode + "\", mode=\"" + mode + "\", numberRows=\""
-        + numberRows + "\", numberColumns=\"" + numberColumns + "\", currentCursorRow=\""
-        + currentCursorRow + "\", currentCursorColumn=\"" + currentCursorColumn + "\", windowId=\""
-        + windowId + "\", commanExecutionTime=\"" + commanExecutionTime + "\"]";
-  }
+    /**
+     * @return the commanExecutionTime
+     */
+    public String getCommanExecutionTime() {
+        return executionTimeString;
+    }
+
+    /**
+     * @param commanExecutionTime
+     *            the commanExecutionTime to set
+     */
+    public void setCommanExecutionTime(String commanExecutionTime) {
+        this.executionTimeString = commanExecutionTime;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "Status [keyboardState=\"" + keyboardState + "\", screenFormatting=\"" + screenFormatting
+                + "\", fieldProtection=\"" + fieldProtection + "\", connectionState=\"" + connectionState
+                + "\", emulatorMode=\"" + emulatorMode + "\", mode=\"" + mode + "\", numberRows=\"" + numberRows
+                + "\", numberColumns=\"" + numberColumns + "\", currentCursorRow=\"" + currentCursorRow
+                + "\", currentCursorColumn=\"" + currentCursorColumn + "\", windowId=\"" + windowId
+                + "\", commanExecutionTime=\"" + executionTimeString + "\"]";
+    }
 }

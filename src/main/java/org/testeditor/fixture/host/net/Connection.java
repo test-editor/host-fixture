@@ -117,7 +117,7 @@ public class Connection {
         if (s3270Process == null || in == null || out == null) {
             return false;
         } else {
-            Result r = doCommand("");
+            Result r = doEmptyCommand();
             createStatus(r);
             if (r.getStatusString().matches(". . . C.*")) {
                 return true;
@@ -233,21 +233,34 @@ public class Connection {
         return lines;
     }
 
-    public Status getStatus() {
-        return requestStatus();
+    /**
+     * 
+     * @return throws RuntimeException if no s3270 process is available,
+     *         otherwise the status of the Connection
+     * @throws RuntimeException
+     *             when no s3270 process is available
+     */
+    public Status getStatus() throws RuntimeException {
+        if (s3270Process == null || in == null || out == null) {
+            throw new RuntimeException("No s3270 Process available");
+
+        } else {
+            return createStatus(doEmptyCommand());
+        }
+    }
+
+    /**
+     * Special command for receiving just the status
+     * 
+     * @return Result of the command.
+     */
+    private Result doEmptyCommand() {
+        return doCommand("");
     }
 
     private void assertProcessAvailable() {
         if (s3270Process == null) {
             throw new RuntimeException("No Connection available!");
-        }
-    }
-
-    private Status requestStatus() {
-        if (s3270Process == null || in == null || out == null) {
-            return null;
-        } else {
-            return createStatus(doCommand(""));
         }
     }
 
