@@ -100,8 +100,17 @@ public class HostDriverFixture {
     @FixtureMethod
     public void typeAt(String value, int row, int col) {
         setCursorPosition(row, col);
+        waiting(100);
         connection.doCommand("String(\"" + value + "\")");
         connection.doCommand("ascii"); // just to see if typed in successfully.
+    }
+
+    private void waiting(long time) {
+        try {
+            Thread.sleep(time); // 1000 milliseconds is one second.
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void setCursorPosition(int row, int col) {
