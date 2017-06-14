@@ -98,7 +98,7 @@ public class HostDriverFixture {
      *            the column of the input field.
      */
     @FixtureMethod
-    public void typeInto(String value, int row, int col) {
+    public void typeAt(String value, int row, int col) {
         setCursorPosition(row, col);
         connection.doCommand("String(\"" + value + "\")");
         connection.doCommand("ascii"); // just to see if typed in successfully.

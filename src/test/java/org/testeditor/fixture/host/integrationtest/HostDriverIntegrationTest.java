@@ -89,7 +89,7 @@ public class HostDriverIntegrationTest {
         // hostdiriverFixture in init
 
         // when
-        hdf.typeInto("äöüßabcdefg", STANDARD_ROW, STANDARD_COLUMN);
+        hdf.typeAt("äöüßabcdefg", STANDARD_ROW, STANDARD_COLUMN);
 
         // then
         // on screen there will be typed some Umlaut characters, the test can

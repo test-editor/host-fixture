@@ -15,12 +15,12 @@ interaction type getStatus {
     method = HostDriverFixture.getStatus()
 }
 
-interaction type typeInto {
+interaction type typeAt {
     template = "Type" ${value} "at row" ${row} "and column" ${column}  
-    method = HostDriverFixture.typeInto(value, row, column)
+    method = HostDriverFixture.typeAt(value, row, column)
 }
 
 component type GeneralHost {
-    interactions = connect, disconnect, getStatus, typeInto
+    interactions = connect, disconnect, getStatus, typeAt
 }
 

@@ -10,28 +10,34 @@ import static org.testeditor.fixture.host.s3270.options.TerminalType.TYPE_3279;
 import org.testeditor.fixture.host.net.Connection;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class HostDriverFixtureTest {
 
     String S3270_PATH = "S3270_PATH";
-    String hostUrl = "HOST_URL";
-    int hostPort = 1234;
-    HostDriverFixture hdf;
+    String HOST_URL = "HOST_URL";
+    int HOST_PORT = 1234;
+    HostDriverFixture fixture;
+    Connection con;
+
+    @Before
+    public void init() {
+        con = mock(Connection.class);
+        fixture = new HostDriverFixture(con);
+    }
 
     @Test
     public void connectionSuccessfulTest() {
 
         // given
-        Connection con = mock(Connection.class);
-        HostDriverFixture hdf = new HostDriverFixture(con);
         when(con.isConnected()).thenReturn(true);
 
         // when
-        boolean connected = hdf.connect(S3270_PATH, hostUrl, hostPort);
+        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT);
 
         // then
-        verify(con).connect(S3270_PATH, hostUrl, hostPort, TYPE_3279, MODE_24x80, CHAR_GERMAN_EURO);
+        verify(con).connect(S3270_PATH, HOST_URL, HOST_PORT, TYPE_3279, MODE_24x80, CHAR_GERMAN_EURO);
         Assert.assertTrue(connected);
     }
 
@@ -39,15 +45,13 @@ public class HostDriverFixtureTest {
     public void connectionUnsuccessfulTest() {
 
         // given
-        Connection con = mock(Connection.class);
-        HostDriverFixture hdf = new HostDriverFixture(con);
         when(con.isConnected()).thenReturn(false);
 
         // when
-        boolean connected = hdf.connect(S3270_PATH, hostUrl, hostPort);
+        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT);
 
         // then
-        verify(con).connect(S3270_PATH, hostUrl, hostPort, TYPE_3279, MODE_24x80, CHAR_GERMAN_EURO);
+        verify(con).connect(S3270_PATH, HOST_URL, HOST_PORT, TYPE_3279, MODE_24x80, CHAR_GERMAN_EURO);
         Assert.assertFalse(connected);
     }
 
@@ -55,12 +59,10 @@ public class HostDriverFixtureTest {
     public void diconnectionSuccessfulTest() {
 
         // given
-        Connection con = mock(Connection.class);
-        HostDriverFixture hdf = new HostDriverFixture(con);
         when(con.disconnect()).thenReturn(true);
 
         // when
-        boolean disconnected = hdf.disconnect();
+        boolean disconnected = fixture.disconnect();
 
         // then
         Assert.assertTrue(disconnected);
@@ -70,11 +72,11 @@ public class HostDriverFixtureTest {
     public void diconnectionUnsuccessfulTest() {
 
         // given
-        Connection con = new Connection();
-        HostDriverFixture hdf = new HostDriverFixture(con);
+        Connection connection = new Connection();
+        HostDriverFixture hostDriverFixture = new HostDriverFixture(connection);
 
         // when
-        boolean disconnected = hdf.disconnect();
+        boolean disconnected = hostDriverFixture.disconnect();
 
         // then
         Assert.assertTrue(disconnected);
