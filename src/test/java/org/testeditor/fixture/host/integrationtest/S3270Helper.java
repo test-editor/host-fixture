@@ -8,7 +8,7 @@ import org.apache.commons.lang3.SystemUtils;
  * The HelperTool is just a container for convenience methods to proof
  * prerequisites for different testcases.
  */
-public class HelperTool {
+public class S3270Helper {
 
     /**
      * @return true if the path to s3270 driver is not null and available, false

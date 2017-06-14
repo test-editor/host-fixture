@@ -29,9 +29,9 @@ public class HostDriverIntegrationTest {
     @Before
     public void intialize() {
         // manual execution only in special environments
-        Assume.assumeTrue("This is not a Windows OS - ignoring test", HelperTool.isOsWindows());
+        Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
-                HelperTool.isS3270DriverPresent(s3270Path));
+                S3270Helper.isS3270DriverPresent(s3270Path));
         hostDriverFixture = new HostDriverFixture();
         Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
     }
