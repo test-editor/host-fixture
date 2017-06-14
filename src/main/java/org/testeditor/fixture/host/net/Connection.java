@@ -151,49 +151,12 @@ public class Connection {
         s3270Process = null;
     }
 
-    // private Status createStatus(Result r) {
-    // String statusCharacters = r.getStatusString();
-    // Status status = new Status(statusCharacters);
-    // r.setStatus(status);
-    // logger.debug(r.getStatus().toString());
-    // return status;
-    // }
-
-    // /**
-    // * A s3270 command will be executed with this method. The whole
-    // communication
-    // * with s3270 will be accessed through this method.
-    // */
-    // public Result doCommand(final String command) {
-    // processAvailable();
-    // try {
-    // out.println(command);
-    // out.flush();
-    // logger.debug(
-    // "*****************************************************************************************");
-    // logger.debug("---> Command sent: '{}'", command);
-    // List<String> lines = new ArrayList<String>();
-    // readOutput(lines);
-    // int size = lines.size();
-    // if (size > 0) {
-    // Result result = new Result(lines.subList(0, size - 1), lines.get(size -
-    // 1));
-    // logger.debug(
-    // "*****************************************************************************************");
-    // return result;
-    // } else {
-    // throw new RuntimeException("no status received in command: " + command);
-    // }
-    // } catch (final IOException ex) {
-    // throw new RuntimeException("IOException during command: " + command, ex);
-
     /**
      * perform a quit statement
      */
     private void doQuit() {
         out.println("quit");
         out.flush();
-
     }
 
     /**
