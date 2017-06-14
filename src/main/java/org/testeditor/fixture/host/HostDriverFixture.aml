@@ -11,7 +11,7 @@ interaction type disconnect {
 }
 
 interaction type getStatus {
-    template = "Get Status"  
+    template = "Get status"  
     method = HostDriverFixture.getStatus()
 }
 
