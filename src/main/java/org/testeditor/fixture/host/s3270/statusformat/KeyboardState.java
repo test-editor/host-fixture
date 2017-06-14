@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.host.s3270.statusformat;
 
 import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
@@ -17,28 +29,27 @@ import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
  *
  */
 public enum KeyboardState {
-  UNLOCKED("U"), LOCKED_WAITING_FOR_RESPONSE("L"), LOCKED_OPERATOR_ERROR("E");
-  private String state;
+    UNLOCKED("U"), LOCKED_WAITING_FOR_RESPONSE("L"), LOCKED_OPERATOR_ERROR("E");
+    private String state;
 
-  private KeyboardState(String state) {
-    this.state = state;
-  }
-
-  public String getState() {
-    return state;
-  }
-
-  public static KeyboardState getKeyboardState(String keyboardStateOnScreen)
-      throws StatusNotFoundException {
-
-    KeyboardState[] values = KeyboardState.values();
-    for (KeyboardState keyboardState : values) {
-
-      if (keyboardState.getState().equals(keyboardStateOnScreen)) {
-        return keyboardState;
-      }
+    private KeyboardState(String state) {
+        this.state = state;
     }
-    throw new StatusNotFoundException("Keyboard state " + keyboardStateOnScreen + " is unknown!");
-  }
+
+    public String getState() {
+        return state;
+    }
+
+    public static KeyboardState getKeyboardState(String keyboardStateOnScreen) throws StatusNotFoundException {
+
+        KeyboardState[] values = KeyboardState.values();
+        for (KeyboardState keyboardState : values) {
+
+            if (keyboardState.getState().equals(keyboardStateOnScreen)) {
+                return keyboardState;
+            }
+        }
+        throw new StatusNotFoundException("Keyboard state " + keyboardStateOnScreen + " is unknown!");
+    }
 
 }
