@@ -62,27 +62,15 @@ public class Status {
     }
 
     private void createKeyBoardState(String input) {
-        try {
-            setKeyboardState(KeyboardState.getKeyboardState(input));
-        } catch (StatusNotFoundException e) {
-            logger.error(e.getMessage());
-        }
+        setKeyboardState(KeyboardState.getKeyboardState(input));
     }
 
     private void createScreenFormatting(String input) {
-        try {
-            setScreenFormatting(ScreenFormatting.getScreenFormatting(input));
-        } catch (StatusNotFoundException e) {
-            logger.error(e.getMessage());
-        }
+        setScreenFormatting(ScreenFormatting.getScreenFormatting(input));
     }
 
     private void createFieldProtection(String input) {
-        try {
-            setFieldProtection(FieldProtection.getFieldProtection(input));
-        } catch (StatusNotFoundException e) {
-            logger.error(e.getMessage());
-        }
+        setFieldProtection(FieldProtection.getFieldProtection(input));
     }
 
     private void createConnectionState(String input) {
@@ -91,71 +79,66 @@ public class Status {
             setConnectionState(ConnectionState.getConnectionState(a));
         } catch (StatusNotFoundException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException("Error occured reading the connection state, unexpected format of state!");
         }
     }
 
     private void createEmulatorMode(String input) {
-        try {
-            setEmulatorMode(EmulatorMode.getEmulatorMode(input));
-        } catch (StatusNotFoundException e) {
-            logger.error(e.getMessage());
-        }
+        setEmulatorMode(EmulatorMode.getEmulatorMode(input));
     }
 
     private void createModelNumber(String input) {
         try {
             setMode(TerminalMode.getTerminalMode(Integer.parseInt(input)));
-        } catch (StatusNotFoundException e) {
+        } catch (NumberFormatException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException("Error occured reading the terminal mode, unexpected format of mode!");
         }
     }
 
     private void createNumberOfRows(String input) {
         try {
             setNumberRows(Integer.parseInt(input));
-        } catch (StatusNotFoundException e) {
+        } catch (NumberFormatException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException("Error occured reading the max number of rows, unexpected format of row!");
         }
     }
 
     private void createNumberOfColumns(String input) {
         try {
             setNumberColumns(Integer.parseInt(input));
-        } catch (StatusNotFoundException e) {
+        } catch (NumberFormatException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException(
+                    "Error occured reading the max number of columns, unexpected format of columns!");
         }
     }
 
     private void createCursorRow(String input) {
         try {
             setCurrentCursorRow(Integer.parseInt(input));
-        } catch (StatusNotFoundException e) {
+        } catch (NumberFormatException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException("Error occured reading the cursor row, unexpected format of row!");
         }
     }
 
     private void createCursorColumn(String input) {
         try {
             setCurrentCursorColumn(Integer.parseInt(input));
-        } catch (StatusNotFoundException e) {
+        } catch (NumberFormatException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException("Error occured reading the cursor column, unexpected format of column!");
         }
     }
 
     private void createWindowId(String input) {
-        try {
-            setWindowId(input);
-        } catch (StatusNotFoundException e) {
-            logger.error(e.getMessage());
-        }
+        setWindowId(input);
     }
 
     private void createCommandExecutionTime(String input) {
-        try {
-            setCommanExecutionTime(input);
-        } catch (StatusNotFoundException e) {
-            logger.error(e.getMessage());
-        }
+        setCommanExecutionTime(input);
     }
 
     /**
@@ -352,4 +335,5 @@ public class Status {
                 + "\", currentCursorColumn=\"" + currentCursorColumn + "\", windowId=\"" + windowId
                 + "\", commanExecutionTime=\"" + executionTimeString + "\"]";
     }
+
 }

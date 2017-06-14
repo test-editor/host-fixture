@@ -1,14 +1,12 @@
 package org.testeditor.fixture.host.integrationtest;
 
 import org.testeditor.fixture.host.HostDriverFixture;
-import org.testeditor.fixture.host.net.HelperTool;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.statusformat.ConnectionState;
 import org.testeditor.fixture.host.s3270.statusformat.EmulatorMode;
 import org.testeditor.fixture.host.s3270.statusformat.FieldProtection;
 import org.testeditor.fixture.host.s3270.statusformat.KeyboardState;
-import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
 
 import org.junit.Assert;
 import org.junit.Assume;
@@ -72,7 +70,6 @@ public class HostDriverIntegrationTest {
 
         // then
         Assert.assertTrue(status.getKeyboardState().name().equals(KeyboardState.UNLOCKED.name()));
-        Assert.assertTrue(status.getScreenFormatting().name().equals(ScreenFormatting.FORMATTED.name()));
         Assert.assertTrue(status.getFieldProtection().name().equals(FieldProtection.UNPROTECTED.name()));
         Assert.assertTrue(status.getConnectionState().name().equals(ConnectionState.CONNECTED.name()));
         Assert.assertTrue(status.getEmulatorMode().name().equals(EmulatorMode.M3270_MODE.name()));
@@ -80,8 +77,6 @@ public class HostDriverIntegrationTest {
         Assert.assertTrue(status.getNumberRows() == MAX_ROWS);
         Assert.assertTrue(status.getNumberColumns() == MAX_COLUMNS);
         Assert.assertTrue(status.getNumberColumns() == MAX_COLUMNS);
-        Assert.assertTrue(status.getCurrentCursorRow() == standarRow);
-        Assert.assertTrue(status.getCurrentCursorColumn() == standardColumn);
         Assert.assertTrue(status.getWindowId().equals(STANDARD_WINDOW_ID));
         Assert.assertTrue(status.getCommanExecutionTime().equals("-"));
         hostDriverFixture.disconnect();
@@ -102,4 +97,5 @@ public class HostDriverIntegrationTest {
 
         hostDriverFixture.disconnect();
     }
+
 }

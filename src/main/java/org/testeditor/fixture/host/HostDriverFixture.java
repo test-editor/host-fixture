@@ -49,8 +49,7 @@ public class HostDriverFixture {
         TerminalMode mode = TerminalMode.MODE_24x80;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
         connection.connect(s3270Path, hostname, port, type, mode, charSet);
-        boolean connected = connection.isConnected();
-        if (connected) {
+        if (connection.isConnected()) {
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
         } else {
@@ -84,7 +83,7 @@ public class HostDriverFixture {
 
     /**
      * Provides a possibility to type a value into a specified field through the
-     * parameters row an column.
+     * parameters row and column.
      * <p>
      * Attention! The input field has to be unprotected and not hidden. If they
      * are, the s3270 emulation will lock further actions.
@@ -105,9 +104,9 @@ public class HostDriverFixture {
         connection.doCommand("ascii"); // just to see if typed in successfully.
     }
 
-    private void waiting(long time) {
+    private void waiting(long miliseconds) {
         try {
-            Thread.sleep(time); // 1000 milliseconds is one second.
+            Thread.sleep(miliseconds);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }

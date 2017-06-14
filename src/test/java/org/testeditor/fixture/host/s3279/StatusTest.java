@@ -17,14 +17,14 @@ public class StatusTest {
     String defaultStatusString = "U F U C(abcdefg.hi.google-mainframe.com) I 2 24 80 6 44 0x0 -";
 
     @Test
-    public void keyboardStateSuccessfullTest() {
+    public void keyboardStateSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
         Assert.assertTrue(status.getKeyboardState().name().equals(KeyboardState.UNLOCKED.name()));
     }
 
     @Test(expected = StatusNotFoundException.class)
-    public void keyboardStateUnsuccessfullTest() {
+    public void keyboardStateUnsuccessfulTest() {
         String statusString = "A F U C"; // <--- keyboard state A is illegal
         new Status(statusString);
     }
@@ -37,7 +37,7 @@ public class StatusTest {
     }
 
     @Test(expected = StatusNotFoundException.class)
-    public void screenFormattingUnSuccessfullTest() {
+    public void screenFormattingUnSuccessfulTest() {
         String statusString = "U A U C"; // <--- screen formatting A is illegal
         new Status(statusString);
     }
@@ -50,7 +50,7 @@ public class StatusTest {
     }
 
     @Test(expected = StatusNotFoundException.class)
-    public void fieldProtectionUnSuccessfullTest() {
+    public void fieldProtectionUnSuccessfulTest() {
         String statusString = "U F A C"; // <--- field protection A is illegal
         new Status(statusString);
     }
@@ -63,7 +63,7 @@ public class StatusTest {
     }
 
     @Test(expected = StatusNotFoundException.class)
-    public void connectionStateUnSuccessfullTest() {
+    public void connectionStateUnSuccessfulTest() {
         String statusString = "U F U A"; // <--- connection state A is illegal
         new Status(statusString);
     }
@@ -76,13 +76,9 @@ public class StatusTest {
     }
 
     @Test(expected = StatusNotFoundException.class)
-    public void emulatorModeUnSuccessfullTest() {
-        String statusString = "U F U C(abcdefg.hi.google-mainframe.com) A 2 24 80 6 44 0x0 -"; // <---
-                                                                                               // emulator
-                                                                                               // mode
-                                                                                               // A
-                                                                                               // is
-                                                                                               // illegal
+    public void emulatorModeUnSuccessfulTest() {
+        // emulator mode A is illegal
+        String statusString = "U F U C(abcdefg.hi.google-mainframe.com) A 2 24 80 6 44 0x0 -";
         new Status(statusString);
     }
 
@@ -94,13 +90,9 @@ public class StatusTest {
     }
 
     @Test(expected = StatusNotFoundException.class)
-    public void terminalModeUnSuccessfullTest() {
-        String statusString = "U F U C(abcdefg.hi.google-mainframe.com) I 8 24 80 6 44 0x0 -"; // <---
-                                                                                               // terminal
-                                                                                               // mode
-                                                                                               // 8
-                                                                                               // is
-                                                                                               // illegal
+    public void terminalModeUnSuccessfulTest() {
+        // terminal mode 8 is illegal
+        String statusString = "U F U C(abcdefg.hi.google-mainframe.com) I 8 24 80 6 44 0x0 -";
         new Status(statusString);
     }
 
@@ -196,4 +188,5 @@ public class StatusTest {
     public String toString() {
         return "StatusTest [defaultResult=" + defaultStatusString + ", toString()=" + super.toString() + "]";
     }
+
 }

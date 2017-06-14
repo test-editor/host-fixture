@@ -80,7 +80,7 @@ public class Connection {
     /**
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
      * 
-     * @return true if disconnected succesful, false otherwise.
+     * @return true if disconnected successful, false otherwise.
      */
     public boolean disconnect() {
         assertProcessAvailable();
@@ -116,27 +116,13 @@ public class Connection {
         if (s3270Process == null || in == null || out == null) {
             return false;
         } else {
+            // when process is available check if commands are possible :O)
             Result r = doEmptyCommand();
-            createStatus(r);
+            r.createStatus();
             if (r.getStatusString().matches(". . . C.*")) {
                 return true;
             } else {
-                doQuit();
-                s3270Process.destroy();
-                s3270Process = null;
-                try {
-                    in.close();
-                } catch (final IOException ex) {
-                    logger.error("Something went wrong during closing InputStreamreader of s2370 process");
-                }
-                cleanup();
-                boolean success = !isConnected();
-                if (success) {
-                    logger.info("Disconnected successfully from host : {} ", hostname);
-                } else {
-                    logger.info("Discoonection failed");
-                }
-                return success;
+                return false;
             }
         }
     }
@@ -178,14 +164,6 @@ public class Connection {
                 }
             }
         }).start();
-    }
-
-    private Status createStatus(Result r) {
-        String statusCharacters = r.getStatusString();
-        Status status = new Status(statusCharacters);
-        r.setStatus(status);
-        logger.debug(r.getStatus().toString());
-        return status;
     }
 
     /**
@@ -244,7 +222,9 @@ public class Connection {
             throw new RuntimeException("No s3270 Process available");
 
         } else {
-            return createStatus(doEmptyCommand());
+            Result r = doEmptyCommand();
+            r.createStatus();
+            return r.getStatus();
         }
     }
 

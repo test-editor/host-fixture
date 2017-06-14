@@ -1,4 +1,4 @@
-package org.testeditor.fixture.host.net;
+package org.testeditor.fixture.host.integrationtest;
 
 import java.io.File;
 
@@ -10,16 +10,13 @@ import org.apache.commons.lang3.SystemUtils;
  */
 public class HelperTool {
 
-    private static String pathS3270;
-
     /**
      * @return true if the path to s3270 driver is not null and available, false
      *         otherwise.
      */
     public static boolean isS3270DriverPresent(String s3270Path) {
         if (s3270Path != null && !s3270Path.isEmpty()) {
-            pathS3270 = s3270Path;
-            return new File(pathS3270).exists();
+            return new File(s3270Path).exists();
         } else {
             return false;
         }
@@ -30,13 +27,6 @@ public class HelperTool {
      */
     public static boolean isOsWindows() {
         return SystemUtils.IS_OS_WINDOWS;
-    }
-
-    /**
-     * @return String reperesenting the path to s3270 driver.exe
-     */
-    public static String getS3270DriverPath() {
-        return pathS3270;
     }
 
 }

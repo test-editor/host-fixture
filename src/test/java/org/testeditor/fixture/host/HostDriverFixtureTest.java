@@ -15,9 +15,9 @@ import org.junit.Test;
 
 public class HostDriverFixtureTest {
 
-    String S3270_PATH = "S3270_PATH";
-    String HOST_URL = "HOST_URL";
-    int HOST_PORT = 1234;
+    private static final String S3270_PATH = "S3270_PATH";
+    private static final String HOST_URL = "HOST_URL";
+    private static final int HOST_PORT = 1234;
     HostDriverFixture fixture;
     Connection con;
 
@@ -81,4 +81,5 @@ public class HostDriverFixtureTest {
         // then
         Assert.assertTrue(disconnected);
     }
+
 }
