@@ -88,7 +88,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeIntoTest() {
+    public void typeAtTest() {
         // given
         // hostDriverFixture in init
 

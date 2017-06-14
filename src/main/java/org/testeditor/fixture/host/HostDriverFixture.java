@@ -66,7 +66,7 @@ public class HostDriverFixture {
      */
     @FixtureMethod
     public boolean disconnect() {
-        logger.info("Connection closing ...");
+        logger.info("Disconnecting ...");
         return connection.disconnect();
     }
 
