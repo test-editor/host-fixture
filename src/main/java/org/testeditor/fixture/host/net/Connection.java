@@ -80,7 +80,7 @@ public class Connection {
     /**
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
      * 
-     * @return true if disconnected succesfull, false otherwise.
+     * @return true if disconnected succesful, false otherwise.
      */
     public boolean disconnect() {
         assertProcessAvailable();
