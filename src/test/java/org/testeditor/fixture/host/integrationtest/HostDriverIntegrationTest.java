@@ -17,8 +17,8 @@ import org.junit.Test;
 
 public class HostDriverIntegrationTest {
 
-    private final int STANDARD_ROW = Integer.parseInt(System.getenv("STANDARD_ROW"));
-    private final int STANDARD_COLUMN = Integer.parseInt(System.getenv("STANDARD_COLUMN"));
+    private final int standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
+    private final int standardColumn = Integer.parseInt(System.getenv("STANDARD_COLUMN"));
     private final int MAX_ROWS = 24;
     private final int MAX_COLUMNS = 80;
     private final String STANDARD_WINDOW_ID = "0x0";
@@ -26,7 +26,7 @@ public class HostDriverIntegrationTest {
     private final String hostUrl = System.getenv("HOST_URL");
     private final int hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
 
-    private HostDriverFixture hdf;
+    private HostDriverFixture hostDriverFixture;
 
     @Before
     public void intialize() {
@@ -34,8 +34,8 @@ public class HostDriverIntegrationTest {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", HelperTool.isOsWindows());
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
                 HelperTool.isS3270DriverPresent(s3270Path));
-        hdf = new HostDriverFixture();
-        Assert.assertTrue(hdf.connect(s3270Path, hostUrl, hostPort));
+        hostDriverFixture = new HostDriverFixture();
+        Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
     }
 
     @Test
@@ -51,14 +51,14 @@ public class HostDriverIntegrationTest {
         // hostDriverFixture in init
 
         // when
-        Status status = hdf.getStatus();
+        Status status = hostDriverFixture.getStatus();
 
         // then
         Assert.assertNotNull(status);
         Assert.assertTrue(status.getFieldProtection() == FieldProtection.UNPROTECTED);
         Assert.assertTrue(status.getConnectionState() == ConnectionState.CONNECTED);
         Assert.assertTrue(status.getKeyboardState() == KeyboardState.UNLOCKED);
-        hdf.disconnect();
+        hostDriverFixture.disconnect();
     }
 
     @Test
@@ -68,7 +68,7 @@ public class HostDriverIntegrationTest {
         // hostDriverFixture in init
 
         // when
-        Status status = hdf.getStatus();
+        Status status = hostDriverFixture.getStatus();
 
         // then
         Assert.assertTrue(status.getKeyboardState().name().equals(KeyboardState.UNLOCKED.name()));
@@ -80,11 +80,11 @@ public class HostDriverIntegrationTest {
         Assert.assertTrue(status.getNumberRows() == MAX_ROWS);
         Assert.assertTrue(status.getNumberColumns() == MAX_COLUMNS);
         Assert.assertTrue(status.getNumberColumns() == MAX_COLUMNS);
-        Assert.assertTrue(status.getCurrentCursorRow() == STANDARD_ROW);
-        Assert.assertTrue(status.getCurrentCursorColumn() == STANDARD_COLUMN);
+        Assert.assertTrue(status.getCurrentCursorRow() == standarRow);
+        Assert.assertTrue(status.getCurrentCursorColumn() == standardColumn);
         Assert.assertTrue(status.getWindowId().equals(STANDARD_WINDOW_ID));
         Assert.assertTrue(status.getCommanExecutionTime().equals("-"));
-        hdf.disconnect();
+        hostDriverFixture.disconnect();
     }
 
     @Test
@@ -93,13 +93,13 @@ public class HostDriverIntegrationTest {
         // hostDriverFixture in init
 
         // when
-        hdf.typeAt("äöüßabcdefg", STANDARD_ROW, STANDARD_COLUMN);
+        hostDriverFixture.typeAt("äöüßabcdefg", standarRow, standardColumn);
 
         // then
         // on screen there will be typed some Umlaut characters, the test can
         // only be verified not before there will be implemented a verification
         // method.
 
-        hdf.disconnect();
+        hostDriverFixture.disconnect();
     }
 }
