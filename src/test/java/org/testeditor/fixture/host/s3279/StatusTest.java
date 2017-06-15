@@ -116,24 +116,10 @@ public class StatusTest {
     }
 
     @Test
-    public void numberOfRowsUnSuccessfulTest() {
-        String statusString = defaultStatusString;
-        Status status = new Status(statusString);
-        Assert.assertFalse(status.getNumberRows() == 32);
-    }
-
-    @Test
     public void numberOfColumnsSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
         Assert.assertTrue(status.getNumberColumns() == 80);
-    }
-
-    @Test
-    public void numberOfColumnsUnSuccessfulTest() {
-        String statusString = defaultStatusString;
-        Status status = new Status(statusString);
-        Assert.assertFalse(status.getNumberColumns() == 81);
     }
 
     @Test
@@ -144,24 +130,10 @@ public class StatusTest {
     }
 
     @Test
-    public void currentColumnUnSuccessfulTest() {
-        String statusString = defaultStatusString;
-        Status status = new Status(statusString);
-        Assert.assertFalse(status.getCurrentCursorColumn() == 45);
-    }
-
-    @Test
     public void currentRowSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
         Assert.assertTrue(status.getCurrentCursorRow() == 6);
-    }
-
-    @Test
-    public void currentRowUnSuccessfulTest() {
-        String statusString = defaultStatusString;
-        Status status = new Status(statusString);
-        Assert.assertFalse(status.getCurrentCursorRow() == 7);
     }
 
     @Test
@@ -172,23 +144,10 @@ public class StatusTest {
     }
 
     @Test
-    public void windowIdUnSuccessfulTest() {
-        String statusString = defaultStatusString;
-        Status status = new Status(statusString);
-        Assert.assertEquals(status.getWindowId(), "WATT");
-    }
-
-    @Test
     public void commandExecutionTimeSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
         Assert.assertEquals(status.getCommanExecutionTime(), "-");
-    }
-
-    @Test
-    public void commandExecutionUnSuccessfulTest() {
-        String statusString = defaultStatusString;
-        new Status(statusString);
     }
 
     /*
