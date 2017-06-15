@@ -32,7 +32,7 @@ public class StatusTest {
     public void keyboardStateSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getKeyboardState().name().equals(KeyboardState.UNLOCKED.name()));
+        Assert.assertEquals(status.getKeyboardState().name(), KeyboardState.UNLOCKED.name());
     }
 
     @Test(expected = StatusNotFoundException.class)
@@ -45,7 +45,7 @@ public class StatusTest {
     public void screenFormattingSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getScreenFormatting().name().equals(ScreenFormatting.FORMATTED.name()));
+        Assert.assertEquals(status.getScreenFormatting().name(), ScreenFormatting.FORMATTED.name());
     }
 
     @Test(expected = StatusNotFoundException.class)
@@ -58,7 +58,7 @@ public class StatusTest {
     public void fieldProtectionSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getFieldProtection().name().equals(FieldProtection.UNPROTECTED.name()));
+        Assert.assertEquals(status.getFieldProtection().name(), FieldProtection.UNPROTECTED.name());
     }
 
     @Test(expected = StatusNotFoundException.class)
@@ -71,7 +71,7 @@ public class StatusTest {
     public void connectionStateSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getConnectionState().name().equals(ConnectionState.CONNECTED.name()));
+        Assert.assertEquals(status.getConnectionState().name(), ConnectionState.CONNECTED.name());
     }
 
     @Test(expected = StatusNotFoundException.class)
@@ -84,7 +84,7 @@ public class StatusTest {
     public void emulatorModeSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getEmulatorMode().name().equals(EmulatorMode.M3270_MODE.name()));
+        Assert.assertEquals(status.getEmulatorMode().name(), EmulatorMode.M3270_MODE.name());
     }
 
     @Test(expected = StatusNotFoundException.class)
@@ -98,7 +98,7 @@ public class StatusTest {
     public void terminalModeSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getMode().name().equals(TerminalMode.MODE_24x80.name()));
+        Assert.assertEquals(status.getMode().name(), TerminalMode.MODE_24x80.name());
     }
 
     @Test(expected = StatusNotFoundException.class)
@@ -168,21 +168,21 @@ public class StatusTest {
     public void windowIdSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getWindowId().equals("0x0"));
+        Assert.assertEquals(status.getWindowId(), "0x0");
     }
 
     @Test
     public void windowIdUnSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertFalse(status.getWindowId().equals("WATT"));
+        Assert.assertEquals(status.getWindowId(), "WATT");
     }
 
     @Test
     public void commandExecutionTimeSuccessfulTest() {
         String statusString = defaultStatusString;
         Status status = new Status(statusString);
-        Assert.assertTrue(status.getCommanExecutionTime().equals("-"));
+        Assert.assertEquals(status.getCommanExecutionTime(), "-");
     }
 
     @Test

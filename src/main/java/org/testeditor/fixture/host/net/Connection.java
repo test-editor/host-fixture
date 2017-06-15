@@ -230,14 +230,10 @@ public class Connection {
      *             when no s3270 process is available
      */
     public Status getStatus() throws RuntimeException {
-        if (s3270Process == null || in == null || out == null) {
-            throw new RuntimeException("No s3270 Process available");
-
-        } else {
-            Result r = doEmptyCommand();
-            r.createStatus();
-            return r.getStatus();
-        }
+        assertProcessAvailable();
+        Result r = doEmptyCommand();
+        r.createStatus();
+        return r.getStatus();
     }
 
     /**
@@ -250,8 +246,8 @@ public class Connection {
     }
 
     private void assertProcessAvailable() {
-        if (s3270Process == null) {
-            throw new RuntimeException("No Connection available!");
-        }
+        if (s3270Process == null || in == null || out == null) {
+            throw new RuntimeException("No s3270 Process available");
+        } // everything is fine, do nothing !
     }
 }
