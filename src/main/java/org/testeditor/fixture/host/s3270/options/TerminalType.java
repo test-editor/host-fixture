@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.host.s3270.options;
 
 /**
@@ -13,15 +25,15 @@ package org.testeditor.fixture.host.s3270.options;
  *
  */
 public enum TerminalType {
-  TYPE_3278("3278"), TYPE_3279("3279");
-  private String type;
+    TYPE_3278("3278"), TYPE_3279("3279");
+    private String type;
 
-  private TerminalType(String type) {
-    this.type = type;
-  }
+    private TerminalType(String type) {
+        this.type = type;
+    }
 
-  public String getType() {
-    return type;
-  }
+    public String getType() {
+        return type;
+    }
 
 }
