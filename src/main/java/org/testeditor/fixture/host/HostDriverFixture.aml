@@ -10,7 +10,17 @@ interaction type disconnect {
     method = HostDriverFixture.disconnect()
 }
 
+interaction type getStatus {
+    template = "Get status"  
+    method = HostDriverFixture.getStatus()
+}
+
+interaction type typeAt {
+    template = "Type" ${value} "at row" ${row} "and column" ${column}  
+    method = HostDriverFixture.typeAt(value, row, column)
+}
+
 component type GeneralHost {
-    interactions = connect, disconnect
+    interactions = connect, disconnect, getStatus, typeAt
 }
 

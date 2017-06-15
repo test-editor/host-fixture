@@ -1,7 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.host.net;
 
-import org.testeditor.fixture.host.Locator;
 import org.testeditor.fixture.host.s3270.Result;
+import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
@@ -80,7 +92,7 @@ public class Connection {
     /**
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
      * 
-     * @return true if disconnected succesfull, false otherwise.
+     * @return true if disconnected successful, false otherwise.
      */
     public boolean disconnect() {
         assertProcessAvailable();
@@ -104,6 +116,27 @@ public class Connection {
             logger.info("Discoonection failed");
         }
         return success;
+    }
+
+    /**
+     *
+     * @return true if connection is established to mainframe through
+     *         s3270/ws3270 emulation and process is still running, false
+     *         otherwise.
+     */
+    public boolean isConnected() {
+        if (s3270Process == null || in == null || out == null) {
+            return false;
+        } else {
+            // when process is available check if commands are possible :O)
+            Result r = doEmptyCommand();
+            r.createStatus();
+            if (r.getStatusString().matches(". . . C.*")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     /**
@@ -146,30 +179,6 @@ public class Connection {
     }
 
     /**
-     *
-     * @return true if connection is established to mainframe through
-     *         s3270/ws3270 emulation and process is still running, false
-     *         otherwise.
-     */
-    public boolean isConnected() {
-        if (s3270Process == null || in == null || out == null) {
-            return false;
-        } else {
-            final Result r = doCommand("");
-            if (r.getStatus().matches(". . . C.*")) {
-                return true;
-            } else {
-                doQuit();
-                s3270Process.destroy();
-                s3270Process = null;
-                in = null;
-                out = null;
-                return false;
-            }
-        }
-    }
-
-    /**
      * A s3270 command will be executed with this method. The whole
      * communication with s3270 will be accessed through this method.
      */
@@ -179,7 +188,7 @@ public class Connection {
             out.println(command);
             out.flush();
             logger.debug("*****************************************************************************************");
-            logger.debug("---> Command sent: \"{}\"", command);
+            logger.debug("---> Command sent: '{}'", command);
             List<String> lines = readOutput();
             int size = lines.size();
             if (size > 0) {
@@ -213,20 +222,32 @@ public class Connection {
         return lines;
     }
 
+    /**
+     * 
+     * @return throws RuntimeException if no s3270 process is available,
+     *         otherwise the status of the Connection
+     * @throws RuntimeException
+     *             when no s3270 process is available
+     */
+    public Status getStatus() throws RuntimeException {
+        assertProcessAvailable();
+        Result r = doEmptyCommand();
+        r.createStatus();
+        return r.getStatus();
+    }
+
+    /**
+     * Special command for receiving just the status
+     * 
+     * @return Result of the command.
+     */
+    private Result doEmptyCommand() {
+        return doCommand("");
+    }
+
     private void assertProcessAvailable() {
-        if (s3270Process == null) {
-            throw new RuntimeException("No Connection available!");
-        }
+        if (s3270Process == null || in == null || out == null) {
+            throw new RuntimeException("No s3270 Process available");
+        } // everything is fine, do nothing !
     }
-
-    public void getStatus() {
-        // TODO is coming next ;O)
-
-    }
-
-    public void typeInto(String value, Locator locator) {
-        // TODO is coming next ;O)
-
-    }
-
 }

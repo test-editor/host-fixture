@@ -10,32 +10,27 @@
  * akquinet AG
  * itemis AG
  *******************************************************************************/
-package org.testeditor.fixture.host;
+package org.testeditor.fixture.host.exceptions;
 
-public class Locator {
+public class StatusNotFoundException extends RuntimeException {
 
-    private int row;
-    private int col;
+    /**
+     * Indicates that the name of the state could not be resolved.
+     */
+    private static final long serialVersionUID = 8794743317555774095L;
 
-    public Locator(int col, int row) {
-        this.setRow(row);
-        this.setCol(col);
+    private String state;
+
+    public StatusNotFoundException(final String state) {
+        super(state);
+        this.state = state;
     }
 
-    public int getCol() {
-        return col;
-    }
-
-    public void setCol(int col) {
-        this.col = col;
-    }
-
-    public int getRow() {
-        return row;
-    }
-
-    public void setRow(int row) {
-        this.row = row;
+    /**
+     * Returns the name of the state that could not be resolved.
+     */
+    public String getState() {
+        return state;
     }
 
 }
