@@ -116,12 +116,11 @@ public class HostDriverFixture {
         connection.doCommand("ascii"); // just to see if typed in successfully.
     }
 
-    private void waiting(long miliseconds) {
+    private void waiting(long milliseconds) {
         try {
-            Thread.sleep(miliseconds);
+            Thread.sleep(milliseconds);
         } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(ex);
+            logger.error(ex.getMessage());
         }
     }
 
