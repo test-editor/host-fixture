@@ -74,7 +74,7 @@ public class StatusTest {
         Assert.assertEquals(status.getConnectionState().name(), ConnectionState.CONNECTED.name());
     }
 
-    @Test(expected = StatusNotFoundException.class)
+    @Test(expected = RuntimeException.class)
     public void connectionStateUnSuccessfulTest() {
         String statusString = "U F U A"; // <--- connection state A is illegal
         new Status(statusString);
