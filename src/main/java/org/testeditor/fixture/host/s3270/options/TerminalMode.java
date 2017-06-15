@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.host.s3270.options;
 
 import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
@@ -20,25 +32,25 @@ import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
  *
  */
 public enum TerminalMode {
-  MODE_24x80(2), MODE_32x80(3), MODE_43x80(4), MODE_27x132(5);
-  private int mode;
+    MODE_24x80(2), MODE_32x80(3), MODE_43x80(4), MODE_27x132(5);
+    private int mode;
 
-  private TerminalMode(int mode) {
-    this.mode = mode;
-  }
-
-  public int getMode() {
-    return mode;
-  }
-
-  public static TerminalMode getTerminalMode(int input) {
-    TerminalMode[] values = TerminalMode.values();
-    for (TerminalMode terminalMode : values) {
-      if (terminalMode.getMode() == input) {
-        return terminalMode;
-      }
+    private TerminalMode(int mode) {
+        this.mode = mode;
     }
-    throw new StatusNotFoundException("Terminal mode " + input + " is unknown!");
-  }
+
+    public int getMode() {
+        return mode;
+    }
+
+    public static TerminalMode getTerminalMode(int input) {
+        TerminalMode[] values = TerminalMode.values();
+        for (TerminalMode terminalMode : values) {
+            if (terminalMode.getMode() == input) {
+                return terminalMode;
+            }
+        }
+        throw new StatusNotFoundException("Terminal mode " + input + " is unknown!");
+    }
 
 }

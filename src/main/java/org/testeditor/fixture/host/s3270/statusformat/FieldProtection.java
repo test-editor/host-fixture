@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.host.s3270.statusformat;
 
 import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
@@ -14,24 +26,24 @@ import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
  *
  */
 public enum FieldProtection {
-  PROTECTED("P"), UNPROTECTED("U");
-  private String protection;
+    PROTECTED("P"), UNPROTECTED("U");
+    private String protection;
 
-  private FieldProtection(String protection) {
-    this.protection = protection;
-  }
-
-  public String getProtection() {
-    return protection;
-  }
-
-  public static FieldProtection getFieldProtection(String input) {
-    FieldProtection[] values = FieldProtection.values();
-    for (FieldProtection fieldProtection : values) {
-      if (fieldProtection.getProtection().equals(input)) {
-        return fieldProtection;
-      }
+    private FieldProtection(String protection) {
+        this.protection = protection;
     }
-    throw new StatusNotFoundException("FieldProtection state " + input + " is unknown!");
-  }
+
+    public String getProtection() {
+        return protection;
+    }
+
+    public static FieldProtection getFieldProtection(String input) {
+        FieldProtection[] values = FieldProtection.values();
+        for (FieldProtection fieldProtection : values) {
+            if (fieldProtection.getProtection().equals(input)) {
+                return fieldProtection;
+            }
+        }
+        throw new StatusNotFoundException("FieldProtection state " + input + " is unknown!");
+    }
 }

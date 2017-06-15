@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.host;
 
 import org.testeditor.fixture.core.interaction.FixtureMethod;
@@ -49,8 +61,7 @@ public class HostDriverFixture {
         TerminalMode mode = TerminalMode.MODE_24x80;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
         connection.connect(s3270Path, hostname, port, type, mode, charSet);
-        boolean connected = connection.isConnected();
-        if (connected) {
+        if (connection.isConnected()) {
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
         } else {
@@ -66,13 +77,13 @@ public class HostDriverFixture {
      */
     @FixtureMethod
     public boolean disconnect() {
-        logger.info("Connection closing ...");
+        logger.info("Disconnecting ...");
         return connection.disconnect();
     }
 
     /**
      * Provides the Status Objekt which will be returned when an input or action
-     * is is
+     * is executed.
      *
      * @return {@link org.testeditor.fixture.host.s3270.Status}
      */
@@ -82,11 +93,39 @@ public class HostDriverFixture {
         return connection.getStatus();
     }
 
+    /**
+     * Provides a possibility to type a value into a specified field through the
+     * parameters row and column.
+     * <p>
+     * Attention! The input field has to be unprotected and not hidden. If they
+     * are, the s3270 emulation will lock further actions.
+     *
+     * @param value
+     *            the value to be typed into the input field of a mainframe
+     *            window.
+     * @param row
+     *            the row of the input field
+     * @param col
+     *            the column of the input field.
+     */
     @FixtureMethod
-    public void typeInto(String value, int row, int col) {
-        logger.info("Set cursor position ...");
-        connection.typeInto(value, new Locator(col, row));
+    public void typeAt(String value, int row, int col) {
+        setCursorPosition(row, col);
+        waiting(100);
+        connection.doCommand("String(\"" + value + "\")");
+        connection.doCommand("ascii"); // just to see if typed in successfully.
+    }
 
+    private void waiting(long milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException ex) {
+            logger.error(ex.getMessage());
+        }
+    }
+
+    private void setCursorPosition(int row, int col) {
+        connection.doCommand("MoveCursor(" + row + "," + col + ")");
     }
 
 }
