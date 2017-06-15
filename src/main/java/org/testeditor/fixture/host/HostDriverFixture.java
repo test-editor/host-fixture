@@ -121,6 +121,7 @@ public class HostDriverFixture {
             Thread.sleep(miliseconds);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException(ex);
         }
     }
 
