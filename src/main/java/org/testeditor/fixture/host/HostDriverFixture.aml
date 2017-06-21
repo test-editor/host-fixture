@@ -1,0 +1,26 @@
+package org.testeditor.fixture.host
+
+interaction type connect {
+    template = "Connect to" ${hostname} "with port" ${port} "using s3270 from" ${s3270Path}     
+    method = HostDriverFixture.connect(s3270Path, hostname, port)
+}
+
+interaction type disconnect {
+    template = "Disconnect"  
+    method = HostDriverFixture.disconnect()
+}
+
+interaction type getStatus {
+    template = "Get status"  
+    method = HostDriverFixture.getStatus()
+}
+
+interaction type typeAt {
+    template = "Type" ${value} "at row" ${row} "and column" ${column}  
+    method = HostDriverFixture.typeAt(value, row, column)
+}
+
+component type GeneralHost {
+    interactions = connect, disconnect, getStatus, typeAt
+}
+
