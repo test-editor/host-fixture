@@ -23,8 +23,10 @@ import org.testeditor.fixture.host.s3270.statusformat.KeyboardState;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class HostDriverIntegrationTest {
 
     private final int standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
