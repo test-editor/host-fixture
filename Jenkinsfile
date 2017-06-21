@@ -14,18 +14,6 @@ nodeWithProperWorkspace {
         }
     }
 
-    // { added some additional debug output to get hold of the failure to detect checkout only
-    sh "git name-rev --name-only --tags HEAD" // this is used for detection of existing version tag
-    sh "git name-rev --name-only --tags HEAD~1" // get some historical tags (if present) 
-    sh "git name-rev --name-only --tags HEAD~2" 
-    sh "git name-rev --name-only --tags HEAD~3" 
-    sh "git name-rev --name-only --tags HEAD~4" 
-    sh "git name-rev --all" // print all
-    sh "git describe --tags" // describe the current tag
-    sh "git status"
-    def tag = bash('git name-rev --name-only --tags HEAD').trim()
-    println tag
-    // } end of added debug information
     
     if (isMaster() && localIsVersionTag()) {
         // Workaround: we don't want infinite releases.
@@ -48,26 +36,44 @@ nodeWithProperWorkspace {
         }
     }
 
+
     if (isMaster()) {
+        def preReleaseVersion = getVersion()
         stage('Release') {
-            currentBuild.displayName = getVersion().replaceAll('-SNAPSHOT', '')
+            currentBuild.displayName = preReleaseVersion.replaceAll('-SNAPSHOT', '')
             withGradleEnv {
                 sh 'git config user.email "jenkins@ci.testeditor.org"'
                 sh 'git config user.name "jenkins"'
                 // workaround: cannot push without credentials using HTTPS => push using SSH
                 sh "git remote set-url origin ${getGithubUrlAsSsh()}"
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '1e68e4c1-48a6-428c-8896-42511359493e', passwordVariable: 'BINTRAY_KEY', usernameVariable: 'BINTRAY_USER']]) {
-                    gradle 'release -Prelease.useAutomaticVersion=true'
+                    gradle 'release'
                 }
             }
+        }
             
-            // TODO merge back to develop
+        stage('Increment develop version') {
+            sh "git checkout develop"
+            sh "git fetch origin"
+            sh "git reset --hard origin/develop"
+            def developVersion = getVersion()
+            if (developVersion == preReleaseVersion) {
+                sh "git merge origin/master"
+                withGradleEnv {
+                    gradle 'updateVersion -Prelease.useAutomaticVersion=true'
+                }
+                sh "git add ."
+                sh "git commit -m '[release] set version ${getVersion()}'"
+                sh "git push origin develop"
+            } else {
+                echo "Version on develop not incremented as it differs from the preReleaseVersion."
+            }
         }
     }
 
 }
 
-String localIsVersionTag() {
+boolean localIsVersionTag() {
     def versionPattern = /v\d+.\d+(.\d+)?(\^0)?/
     def tag = bash('git name-rev --name-only --tags HEAD~1').trim()
     return tag ==~ versionPattern
