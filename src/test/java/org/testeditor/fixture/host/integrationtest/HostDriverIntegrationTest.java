@@ -23,10 +23,8 @@ import org.testeditor.fixture.host.s3270.statusformat.KeyboardState;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class HostDriverIntegrationTest {
 
     private final int standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
@@ -43,11 +41,15 @@ public class HostDriverIntegrationTest {
     @Before
     public void intialize() {
         // manual execution only in special environments
+
+        hostDriverFixture = new HostDriverFixture();
+        Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
+    }
+
+    private void assumeTrue() {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
                 S3270Helper.isS3270DriverPresent(s3270Path));
-        hostDriverFixture = new HostDriverFixture();
-        Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
     }
 
     @Test
@@ -58,7 +60,7 @@ public class HostDriverIntegrationTest {
      * this file.
      */
     public void connectionTest() {
-
+        assumeTrue();
         // given
         // hostDriverFixture in init
 
@@ -75,7 +77,7 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void statusTest() {
-
+        assumeTrue();
         // given
         // hostDriverFixture in init
 
@@ -98,6 +100,7 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void typeAtTest() {
+        assumeTrue();
         // given
         // hostDriverFixture in init
 
