@@ -27,27 +27,33 @@ import org.junit.Test;
 
 public class HostDriverIntegrationTest {
 
-    private final int standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
-    private final int standardColumn = Integer.parseInt(System.getenv("STANDARD_COLUMN"));
+    private int standarRow = 0;
+    private int standardColumn = 0;
     private final int MAX_ROWS = 24;
     private final int MAX_COLUMNS = 80;
     private final String STANDARD_WINDOW_ID = "0x0";
-    private final String s3270Path = System.getenv("S3270_PATH");
-    private final String hostUrl = System.getenv("HOST_URL");
-    private final int hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
+    private String s3270Path = "S3270_PATH";
+    private String hostUrl = "HOST_URL";
+    private int hostPort = 0;
 
     private HostDriverFixture hostDriverFixture;
 
     @Before
     public void intialize() {
         // manual execution only in special environments
+        assumeTrue();
+        standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
+        standardColumn = Integer.parseInt(System.getenv("STANDARD_COLUMN"));
 
+        hostUrl = System.getenv("HOST_URL");
+        hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
         hostDriverFixture = new HostDriverFixture();
         Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
     }
 
     private void assumeTrue() {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
+        s3270Path = System.getenv("S3270_PATH");
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
                 S3270Helper.isS3270DriverPresent(s3270Path));
     }
