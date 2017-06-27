@@ -14,6 +14,7 @@ package org.testeditor.fixture.host.integrationtest;
 
 import org.testeditor.fixture.host.HostDriverFixture;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.s3270.actions.ControlCommand;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.statusformat.ConnectionState;
 import org.testeditor.fixture.host.s3270.statusformat.EmulatorMode;
@@ -112,6 +113,46 @@ public class HostDriverIntegrationTest {
 
         // when
         hostDriverFixture.typeAt("äöüßabcdefg", standarRow, standardColumn);
+
+        // then
+        // on screen there will be typed some Umlaut characters, the test can
+        // only be verified not before there will be implemented a verification
+        // method.
+
+        hostDriverFixture.disconnect();
+    }
+
+    @Test
+    public void newTransactionTest() {
+        assumeTrue();
+        // given
+        // hostDriverFixture in init
+        String user = System.getenv("USER");
+        String userPwd = System.getenv("USER_PWD");
+        String testSystem = System.getenv("TEST_SYSTEM");
+        String transaction = System.getenv("TRANSACTION");
+        String stoptransaction = System.getenv("STOP_TRANSACTION");
+        String stopSystem = System.getenv("STOP_SYSTEM");
+        int testDefaultRow = Integer.parseInt(System.getenv("TEST_DEFAULT_ROW"));
+        int testDefaultColumn = Integer.parseInt(System.getenv("TEST_DEFAULT_COLUMN"));
+        int transactionRow = Integer.parseInt(System.getenv("TRANSACTION_ROW"));
+        int transactionColumn = Integer.parseInt(System.getenv("TRANSACTION_COLUMN"));
+        int userPwdRow = Integer.parseInt(System.getenv("USER_PWD_ROW"));
+        int userPwdColumn = Integer.parseInt(System.getenv("USER_PWD_COLUMN"));
+
+        // when
+        hostDriverFixture.typeAt(user, standarRow, standardColumn);
+        hostDriverFixture.typeAt(userPwd, userPwdRow, userPwdColumn);
+        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.typeAt(testSystem, testDefaultRow, testDefaultColumn);
+        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.typeAt(transaction, transactionRow, transactionColumn);
+        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.callControlCommand(ControlCommand.CLEAR);
+        hostDriverFixture.typeAt(stoptransaction, transactionRow, transactionColumn);
+        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.typeAt(stopSystem, testDefaultRow, testDefaultColumn);
+        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
 
         // then
         // on screen there will be typed some Umlaut characters, the test can

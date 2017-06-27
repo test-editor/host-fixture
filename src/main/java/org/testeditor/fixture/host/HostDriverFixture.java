@@ -15,6 +15,7 @@ package org.testeditor.fixture.host;
 import org.testeditor.fixture.core.interaction.FixtureMethod;
 import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.s3270.actions.ControlCommand;
 import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
@@ -113,6 +114,25 @@ public class HostDriverFixture {
         setCursorPosition(row, col);
         waiting(100);
         connection.doCommand("String(\"" + value + "\")");
+        connection.doCommand("ascii"); // just to see if typed in successfully.
+    }
+
+    /**
+     * Provides the possibility to access some special commands defined under
+     * {@link ControlCommand}
+     * 
+     * 
+     * @param value
+     *            a ControlCommand like {@link ControllCommand#DELETE},
+     *            {@link ControllCommand#TAB}, {@link ControllCommand#ENTER}
+     *            etc.
+     * 
+     * @see ControlCommand
+     */
+    @FixtureMethod
+    public void callControlCommand(ControlCommand value) {
+        waiting(100);
+        connection.doCommand(value.getCommand());
         connection.doCommand("ascii"); // just to see if typed in successfully.
     }
 

@@ -20,7 +20,13 @@ interaction type typeAt {
     method = HostDriverFixture.typeAt(value, row, column)
 }
 
+
+interaction typ callControlCommand {
+    template = "Call control command" ${command}  
+    method = HostDriverFixture.sendControlCommand(command)
+}
+
 component type GeneralHost {
-    interactions = connect, disconnect, getStatus, typeAt
+    interactions = connect, disconnect, getStatus, typeAt, callControlCommand
 }
 
