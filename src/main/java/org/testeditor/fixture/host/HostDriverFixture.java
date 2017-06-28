@@ -130,7 +130,7 @@ public class HostDriverFixture {
      * @see ControlCommand
      */
     @FixtureMethod
-    public void callControlCommand(ControlCommand value) {
+    public void sendControlCommand(ControlCommand value) {
         waiting(100);
         connection.doCommand(value.getCommand());
         connection.doCommand("ascii"); // just to see if typed in successfully.

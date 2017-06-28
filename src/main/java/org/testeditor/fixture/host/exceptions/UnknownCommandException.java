@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.exceptions;
 
-public class CommandNotFoundException extends RuntimeException {
+public class UnknownCommandException extends RuntimeException {
 
     /**
      * Indicates that the name of the command could not be resolved.
@@ -21,7 +21,7 @@ public class CommandNotFoundException extends RuntimeException {
 
     private String command;
 
-    public CommandNotFoundException(final String command) {
+    public UnknownCommandException(final String command) {
         super(command);
         this.command = command;
     }

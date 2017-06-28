@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.s3270.actions;
 
-import org.testeditor.fixture.host.exceptions.CommandNotFoundException;
+import org.testeditor.fixture.host.exceptions.UnknownCommandException;
 
 /**
  * Following special commands can be used in tests :
@@ -55,7 +55,7 @@ public enum ControlCommand {
                 return controlCommand;
             }
         }
-        throw new CommandNotFoundException("ControlCommand " + input + " is unknown!");
+        throw new UnknownCommandException("ControlCommand " + input + " is unknown!");
     }
 
 }

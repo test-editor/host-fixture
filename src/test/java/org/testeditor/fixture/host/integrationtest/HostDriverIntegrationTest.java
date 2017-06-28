@@ -42,7 +42,7 @@ public class HostDriverIntegrationTest {
     @Before
     public void intialize() {
         // manual execution only in special environments
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
         standardColumn = Integer.parseInt(System.getenv("STANDARD_COLUMN"));
 
@@ -52,7 +52,7 @@ public class HostDriverIntegrationTest {
         Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
     }
 
-    private void assumeTrue() {
+    private void assumeWindowsAndS3270Accessible() {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
         s3270Path = System.getenv("S3270_PATH");
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
@@ -67,7 +67,7 @@ public class HostDriverIntegrationTest {
      * this file.
      */
     public void connectionTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
@@ -84,7 +84,7 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void statusTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
@@ -107,7 +107,7 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void typeAtTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
@@ -124,7 +124,7 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void newTransactionTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
         String user = System.getenv("USER");
@@ -143,16 +143,16 @@ public class HostDriverIntegrationTest {
         // when
         hostDriverFixture.typeAt(user, standarRow, standardColumn);
         hostDriverFixture.typeAt(userPwd, userPwdRow, userPwdColumn);
-        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
         hostDriverFixture.typeAt(testSystem, testDefaultRow, testDefaultColumn);
-        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
         hostDriverFixture.typeAt(transaction, transactionRow, transactionColumn);
-        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
-        hostDriverFixture.callControlCommand(ControlCommand.CLEAR);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.sendControlCommand(ControlCommand.CLEAR);
         hostDriverFixture.typeAt(stoptransaction, transactionRow, transactionColumn);
-        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
         hostDriverFixture.typeAt(stopSystem, testDefaultRow, testDefaultColumn);
-        hostDriverFixture.callControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
 
         // then
         // on screen there will be typed some Umlaut characters, the test can

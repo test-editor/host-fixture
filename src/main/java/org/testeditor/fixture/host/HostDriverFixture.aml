@@ -21,12 +21,12 @@ interaction type typeAt {
 }
 
 
-interaction typ callControlCommand {
-    template = "Call control command" ${command}  
+interaction typ sendControlCommand {
+    template = "Send control command" ${command}  
     method = HostDriverFixture.sendControlCommand(command)
 }
 
 component type GeneralHost {
-    interactions = connect, disconnect, getStatus, typeAt, callControlCommand
+    interactions = connect, disconnect, getStatus, typeAt, sendControlCommand
 }
 
