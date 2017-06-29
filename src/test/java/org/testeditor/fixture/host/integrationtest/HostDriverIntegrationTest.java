@@ -14,6 +14,7 @@ package org.testeditor.fixture.host.integrationtest;
 
 import org.testeditor.fixture.host.HostDriverFixture;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.s3270.actions.ControlCommand;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.statusformat.ConnectionState;
 import org.testeditor.fixture.host.s3270.statusformat.EmulatorMode;
@@ -41,7 +42,7 @@ public class HostDriverIntegrationTest {
     @Before
     public void intialize() {
         // manual execution only in special environments
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         standarRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
         standardColumn = Integer.parseInt(System.getenv("STANDARD_COLUMN"));
 
@@ -51,7 +52,7 @@ public class HostDriverIntegrationTest {
         Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort));
     }
 
-    private void assumeTrue() {
+    private void assumeWindowsAndS3270Accessible() {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
         s3270Path = System.getenv("S3270_PATH");
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
@@ -66,7 +67,7 @@ public class HostDriverIntegrationTest {
      * this file.
      */
     public void connectionTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
@@ -83,7 +84,7 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void statusTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
@@ -106,12 +107,52 @@ public class HostDriverIntegrationTest {
 
     @Test
     public void typeAtTest() {
-        assumeTrue();
+        assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
         // when
         hostDriverFixture.typeAt("äöüßabcdefg", standarRow, standardColumn);
+
+        // then
+        // on screen there will be typed some Umlaut characters, the test can
+        // only be verified not before there will be implemented a verification
+        // method.
+
+        hostDriverFixture.disconnect();
+    }
+
+    @Test
+    public void newTransactionTest() {
+        assumeWindowsAndS3270Accessible();
+        // given
+        // hostDriverFixture in init
+        String user = System.getenv("USER");
+        String userPwd = System.getenv("USER_PWD");
+        String testSystem = System.getenv("TEST_SYSTEM");
+        String transaction = System.getenv("TRANSACTION");
+        String stoptransaction = System.getenv("STOP_TRANSACTION");
+        String stopSystem = System.getenv("STOP_SYSTEM");
+        int testDefaultRow = Integer.parseInt(System.getenv("TEST_DEFAULT_ROW"));
+        int testDefaultColumn = Integer.parseInt(System.getenv("TEST_DEFAULT_COLUMN"));
+        int transactionRow = Integer.parseInt(System.getenv("TRANSACTION_ROW"));
+        int transactionColumn = Integer.parseInt(System.getenv("TRANSACTION_COLUMN"));
+        int userPwdRow = Integer.parseInt(System.getenv("USER_PWD_ROW"));
+        int userPwdColumn = Integer.parseInt(System.getenv("USER_PWD_COLUMN"));
+
+        // when
+        hostDriverFixture.typeAt(user, standarRow, standardColumn);
+        hostDriverFixture.typeAt(userPwd, userPwdRow, userPwdColumn);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.typeAt(testSystem, testDefaultRow, testDefaultColumn);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.typeAt(transaction, transactionRow, transactionColumn);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.sendControlCommand(ControlCommand.CLEAR);
+        hostDriverFixture.typeAt(stoptransaction, transactionRow, transactionColumn);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
+        hostDriverFixture.typeAt(stopSystem, testDefaultRow, testDefaultColumn);
+        hostDriverFixture.sendControlCommand(ControlCommand.ENTER);
 
         // then
         // on screen there will be typed some Umlaut characters, the test can
