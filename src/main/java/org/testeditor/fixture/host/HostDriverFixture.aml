@@ -1,5 +1,14 @@
 package org.testeditor.fixture.host
 
+
+element type inputField {
+    interactions = getStatus, typeAt, sendControlCommand, getValueAt
+}
+
+element type field {
+    interactions = getStatus, sendControlCommand, getValueAt
+}
+
 interaction type connect {
     template = "Connect to" ${hostname} "with port" ${port} "using s3270 from" ${s3270Path}     
     method = HostDriverFixture.connect(s3270Path, hostname, port)
@@ -16,17 +25,64 @@ interaction type getStatus {
 }
 
 interaction type typeAt {
-    template = "Type" ${value} "at row" ${row} "and column" ${column}  
-    method = HostDriverFixture.typeAt(value, row, column)
+    template = "Enter" ${value} "into" ${element} 
+    method = HostDriverFixture.typeAt(element, locatorStrategy, value)
 }
 
-
-interaction typ sendControlCommand {
+interaction type sendControlCommand {
     template = "Send control command" ${command}  
     method = HostDriverFixture.sendControlCommand(command)
 }
 
-component type GeneralHost {
-    interactions = connect, disconnect, getStatus, typeAt, sendControlCommand
+interaction type sendBacktab {
+    template = "Send BackTab"  
+    method = HostDriverFixture.sendBacktab()
 }
 
+interaction type sendClear {
+    template = "Send Clear"  
+    method = HostDriverFixture.sendClear()
+}
+
+interaction type sendEnter {
+    template = "Send Enter"  
+    method = HostDriverFixture.sendEnter()
+}
+
+interaction type sendEraseEndOfField {
+    template = "Send EraseEndOfField"  
+    method = HostDriverFixture.sendEraseEndOfField()
+}
+
+interaction type sendEraseInput {
+    template = "Send EraseInput" 
+    method = HostDriverFixture.sendEraseInput()
+}
+
+interaction type sendReset {
+    template = "Send Reset" 
+    method = HostDriverFixture.sendReset()
+}
+
+interaction type sendTab {
+    template = "Send Tab" 
+    method = HostDriverFixture.sendTab()
+}
+
+interaction type send {
+    template = "Send " ${command}  
+    method = HostDriverFixture.send(command)
+}
+
+interaction type getValueAt {
+    template = "Read value from" ${element}
+    method = HostDriverFixture.readValueAt(element,locatorStrategy) 
+}
+
+component type GeneralHost {
+    interactions = connect, disconnect, getStatus, typeAt, sendControlCommand, getValueAt, send, sendBacktab, sendClear, sendEnter, sendEraseEndOfField, sendEraseInput, sendReset, sendTab
+}
+
+component type Actions {
+    interactions = sendBacktab, sendClear, sendEnter, sendEraseEndOfField, sendEraseInput, sendReset, sendTab
+}
