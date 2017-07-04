@@ -29,6 +29,9 @@ dependencies {
     testCompile 'com.github.tomakehurst:wiremock:2.6.0'
     testCompile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.11.0'
     testCompile 'com.google.truth:truth:0.31'
+    testCompile 'commons-codec:commons-codec:1.10'
+    testCompile 'org.apache.commons:commons-lang3:3.6'
+    
 }
     
 sourceSets.main.resources.srcDirs = [ "src/main/java" ]

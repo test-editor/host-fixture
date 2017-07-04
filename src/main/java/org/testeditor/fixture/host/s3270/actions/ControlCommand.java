@@ -19,7 +19,6 @@ import org.testeditor.fixture.host.exceptions.UnknownCommandException;
  * <ul>
  * <li>{@link #BACKTAB} - move cursor to previous input field</li>
  * <li>{@link #CLEAR} - clear screen</li>
- * <li>{@link #DELETE} - delete character under cursor</li>
  * <li>{@link #ENTER} - send an command</li>
  * <li>{@link #ERASE_EOF} - erase to end of current field</li>
  * <li>{@link #PF3} - get back to to previous screen</li>
@@ -36,7 +35,7 @@ import org.testeditor.fixture.host.exceptions.UnknownCommandException;
  */
 public enum ControlCommand {
 
-    BACKTAB("BackTab"), CLEAR("Clear"), DELETE("Delete"), ENTER("Enter"), ERASE_EOF("EraseEOF"), PF3("PF(3)"), RESET(
+    BACKTAB("BackTab"), CLEAR("Clear"), ENTER("Enter"), ERASE_EOF("EraseEOF"), ERASE_INPUT("EraseInput"), RESET(
             "Reset"), TAB("Tab");
     private String command;
 

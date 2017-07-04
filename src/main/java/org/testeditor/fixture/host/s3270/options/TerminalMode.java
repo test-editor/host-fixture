@@ -34,9 +34,28 @@ import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
 public enum TerminalMode {
     MODE_24x80(2), MODE_32x80(3), MODE_43x80(4), MODE_27x132(5);
     private int mode;
+    private int maxRow;
+    private int maxColumn;
 
     private TerminalMode(int mode) {
         this.mode = mode;
+        setMaxRow();
+        setMaxColumn();
+    }
+
+    private void setMaxColumn() {
+        String string = super.toString();
+        String replacedString = string.replace("MODE_", "");
+        String[] splittedStrings = replacedString.split("x");
+        this.maxColumn = Integer.parseInt(splittedStrings[1]);
+
+    }
+
+    private void setMaxRow() {
+        String string = super.toString();
+        String replacedString = string.replace("MODE_", "");
+        String[] splittedStrings = replacedString.split("x");
+        this.maxRow = Integer.parseInt(splittedStrings[0]);
     }
 
     public int getMode() {
@@ -44,13 +63,20 @@ public enum TerminalMode {
     }
 
     public static TerminalMode getTerminalMode(int input) {
-        TerminalMode[] values = TerminalMode.values();
-        for (TerminalMode terminalMode : values) {
+        for (TerminalMode terminalMode : TerminalMode.values()) {
             if (terminalMode.getMode() == input) {
                 return terminalMode;
             }
         }
         throw new StatusNotFoundException("Terminal mode " + input + " is unknown!");
+    }
+
+    public int getMaxRow() {
+        return this.maxRow;
+    }
+
+    public int getMaxColumn() {
+        return this.maxColumn;
     }
 
 }
