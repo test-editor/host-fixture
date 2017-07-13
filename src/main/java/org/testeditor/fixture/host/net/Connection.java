@@ -23,8 +23,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -50,6 +53,20 @@ public class Connection {
      * Used for reading input from the s3270 process.
      */
     private BufferedReader in = null;
+
+    public Connection() {
+        // Default Constructor
+    }
+
+    /**
+     * This Constructor is for test purposes
+     */
+    public Connection(Process s3270Process, String hostname, BufferedReader in, PrintWriter out) {
+        this.s3270Process = s3270Process;
+        this.hostname = hostname;
+        this.in = in;
+        this.out = out;
+    }
 
     /**
      * Connects to a mainframe. The s3270 subprocess (which does the
@@ -187,14 +204,19 @@ public class Connection {
         try {
             out.println(command);
             out.flush();
-            logger.debug("*****************************************************************************************");
+            logger.debug(
+                    "************************************************************************************************");
             logger.debug("---> Command sent: '{}'", command);
+            if (command.equals("ascii")) {
+                logger.debug(
+                        "-------------- 0----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8");
+            }
             List<String> lines = readOutput();
             int size = lines.size();
             if (size > 0) {
                 Result result = new Result(lines.subList(0, size - 1), lines.get(size - 1));
                 logger.debug(
-                        "*****************************************************************************************");
+                        "************************************************************************************************");
                 return result;
             } else {
                 throw new RuntimeException("no status received in command: " + command);
@@ -204,8 +226,10 @@ public class Connection {
         }
     }
 
-    private List<String> readOutput() throws IOException {
+    // TODO this should be private
+    public List<String> readOutput() throws IOException {
         List<String> lines = new ArrayList<String>();
+        int lineNumber = 0;
         while (true) {
             String line = in.readLine();
             if (line == null) {
@@ -213,13 +237,22 @@ public class Connection {
                 // if we get here, it's a more obscure error
                 throw new RuntimeException("s3270 process not responding");
             }
-            logger.debug("<--- {}", line);
+            String number = createNumber(lineNumber);
+            logger.debug("<--- {} '{}'", number, line);
+            lineNumber++;
             if (line.equals("ok")) {
                 break;
             }
             lines.add(line);
         }
         return lines;
+    }
+
+    private String createNumber(int lineNumber) {
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.GERMAN);
+        ((DecimalFormat) numberFormat).applyPattern("00");
+        return numberFormat.format(new Integer(lineNumber));
+
     }
 
     /**
@@ -250,4 +283,5 @@ public class Connection {
             throw new RuntimeException("No s3270 Process available");
         } // everything is fine, do nothing !
     }
+
 }
