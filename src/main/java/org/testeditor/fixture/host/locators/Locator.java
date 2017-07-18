@@ -10,32 +10,16 @@
  * akquinet AG
  * itemis AG
  *******************************************************************************/
-package org.testeditor.fixture.host;
+package org.testeditor.fixture.host.locators;
 
-public class Locator {
+/**
+ * The Locator is a representation of a range on a Mainframe host screen.<br>
+ * This could be represented through a declaration of a start and an end point.
+ * 
+ * See {@link LocatorStrategy} for differentiation each of these reprentations
+ */
+public interface Locator {
 
-    private int row;
-    private int col;
-
-    public Locator(int col, int row) {
-        this.setRow(row);
-        this.setCol(col);
-    }
-
-    public int getCol() {
-        return col;
-    }
-
-    public void setCol(int col) {
-        this.col = col;
-    }
-
-    public int getRow() {
-        return row;
-    }
-
-    public void setRow(int row) {
-        this.row = row;
-    }
+    public void checkBoundaries();
 
 }
