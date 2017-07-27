@@ -112,13 +112,25 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
+    public void screenTest() {
+        assumeWindowsAndS3270Accessible();
+        // given
+        // hostDriverFixture in init
+
+        // when
+
+        String allFieldsAsString = hostDriverFixture.buildAllFieldsAsString();
+        hostDriverFixture.disconnect();
+    }
+
+    @Test
     public void typeAtTest() {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, "äöüßabcdefg");
+        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, "äöüßabc");
         String actualValue = hostDriverFixture.readValueAt(
                 standardRow + ";" + standardColumn + ";" + standardRow + ";" + (standardColumn + 6),
                 LocatorStrategy.START_STOP);

@@ -25,6 +25,9 @@ import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
 import org.testeditor.fixture.host.s3270.statusformat.FieldProtection;
+import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
+import org.testeditor.fixture.host.screen.Field;
+import org.testeditor.fixture.host.screen.TerminalScreen;
 import org.testeditor.fixture.host.util.LineReader;
 
 import java.util.List;
@@ -143,7 +146,7 @@ public class HostDriverFixture {
     @FixtureMethod
     public void typeAt(String elementLocator, LocatorStrategy locatorType, String value) {
         Result result = moveCursor(elementLocator, locatorType);
-        result.createStatus();
+        result.logStatus();
         Status status = result.getStatus();
         if (status.getFieldProtection() == FieldProtection.UNPROTECTED) {
             waiting(100);
@@ -360,6 +363,50 @@ public class HostDriverFixture {
             break;
         }
         return result;
+    }
+
+    /**
+     * Prints all {@link Field}s of a mainframe ScreenBuffer in the form:
+     * 
+     * <pre>
+     * |----------------------------------------------------------------------------------------------------------------------------------------------|
+     * |Nr |row|field|width|colStart|colEnd|numeric|protected|hidden|value                                                                           
+     * |----------------------------------------------------------------------------------------------------------------------------------------------|
+     * |1  |0  |1    |4    |1       |4     |       |true     |false | 'z/OS'                                                                         
+     * |2  |0  |2    |10   |6       |15    |       |false    |false | ' Z18 Level'                                                                   
+     * |3  |0  |3    |5    |17      |21    |true   |false    |false | ' 0609'                                                                        
+     * |4  |0  |4    |31   |23      |53    |       |false    |true  | '                               '                                              
+     * |5  |0  |5    |24   |55      |78    |       |false    |false | 'IP Address = 78.51.59.98'                                                     
+     * |6  |0  |6    |6    |80      |85    |       |false    |false | '
+     * ...
+     * </pre>
+     * 
+     * <strong>Caution:</strong> But before it will be verified, if the result
+     * of ScreenBuffer is formatted. If the application program uses field
+     * attributes to define fields on the screen, then the screen is formatted.
+     * If there are no fields defined on the screen, then the screen is
+     * unformatted, and the operator uses it in free-form manner.
+     * 
+     * @return The String reprentation of all found {@link Field}s in
+     *         ScreenBuffer.
+     */
+    @FixtureMethod
+    public String buildAllFieldsAsString() {
+        String allFieldAsString = null;
+        Result result = connection.doCommand("ReadBuffer(Ascii)");
+        Status status = result.getStatus();
+        ScreenFormatting screenFormatting = status.getScreenFormatting();
+        // Check if ScreenBuffer is formatted !
+        if (screenFormatting == ScreenFormatting.FORMATTED) {
+            TerminalScreen screen = new TerminalScreen();
+            allFieldAsString = screen.printAllFieldAsString(result.getDataLines());
+            logger.info(allFieldAsString);
+
+        } else {
+            throw new RuntimeException(
+                    "The result of delivered Host-Screen is not formatted, so it is not possible to get any information about fields!");
+        }
+        return allFieldAsString;
     }
 
     private void sendEmulationCommand(String command) {
