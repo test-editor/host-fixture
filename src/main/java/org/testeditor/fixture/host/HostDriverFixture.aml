@@ -29,6 +29,11 @@ interaction type typeAt {
     method = HostDriverFixture.typeAt(element, locatorStrategy, value)
 }
 
+interaction type printFieldsOnLog {
+    template = "Print fields on log" 
+    method = HostDriverFixture.buildAllFieldsAsString()
+}
+
 interaction type sendControlCommand {
     template = "Send control command" ${command}  
     method = HostDriverFixture.sendControlCommand(command)
@@ -80,7 +85,7 @@ interaction type getValueAt {
 }
 
 component type GeneralHost {
-    interactions = connect, disconnect, getStatus, typeAt, sendControlCommand, getValueAt, send, sendBacktab, sendClear, sendEnter, sendEraseEndOfField, sendEraseInput, sendReset, sendTab
+   interactions = connect, disconnect, getStatus, typeAt, sendControlCommand, printFieldsOnLog, getValueAt, send, sendBacktab, sendClear, sendEnter, sendEraseEndOfField, sendEraseInput, sendReset, sendTab
 }
 
 component type Actions {

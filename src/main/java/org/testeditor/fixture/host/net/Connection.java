@@ -147,7 +147,7 @@ public class Connection {
         } else {
             // when process is available check if commands are possible :O)
             Result r = doEmptyCommand();
-            r.createStatus();
+            r.logStatus();
             if (r.getStatusString().matches(". . . C.*")) {
                 return true;
             } else {
@@ -213,8 +213,8 @@ public class Connection {
             }
             List<String> lines = readOutput();
             int size = lines.size();
-            if (size > 0) {
-                Result result = new Result(lines.subList(0, size - 1), lines.get(size - 1));
+            if (size > 1) {
+                Result result = new Result(lines.subList(0, size - 2), lines.get(size - 2), lines.get(size - 1));
                 logger.debug(
                         "************************************************************************************************");
                 return result;
@@ -239,11 +239,11 @@ public class Connection {
             }
             String number = createNumber(lineNumber);
             logger.debug("<--- {} '{}'", number, line);
+            lines.add(line);
             lineNumber++;
             if (line.equals("ok")) {
                 break;
             }
-            lines.add(line);
         }
         return lines;
     }
@@ -265,7 +265,7 @@ public class Connection {
     public Status getStatus() throws RuntimeException {
         assertProcessAvailable();
         Result r = doEmptyCommand();
-        r.createStatus();
+        r.logStatus();
         return r.getStatus();
     }
 
