@@ -20,7 +20,7 @@ test.testLogging.showStandardStreams = true
 
 
 dependencies {
-    compile 'org.testeditor.fixture:core-fixture:3.1.0'
+    compile 'org.testeditor.fixture:core-fixture:3.2.0'
     compile 'com.mashape.unirest:unirest-java:1.4.9'
     compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.google.guava:guava:21.0'

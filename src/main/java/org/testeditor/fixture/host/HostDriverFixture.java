@@ -12,7 +12,20 @@
  *******************************************************************************/
 package org.testeditor.fixture.host;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.TestRunListener;
+import org.testeditor.fixture.core.TestRunReportable;
+import org.testeditor.fixture.core.TestRunReporter;
+import org.testeditor.fixture.core.TestRunReporter.Action;
+import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 import org.testeditor.fixture.core.interaction.FixtureMethod;
+import org.testeditor.fixture.core.logging.FilenameHelper;
 import org.testeditor.fixture.host.locators.LocatorByStart;
 import org.testeditor.fixture.host.locators.LocatorByStartStop;
 import org.testeditor.fixture.host.locators.LocatorByWidth;
@@ -30,11 +43,6 @@ import org.testeditor.fixture.host.screen.Field;
 import org.testeditor.fixture.host.screen.TerminalScreen;
 import org.testeditor.fixture.host.util.LineReader;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * HostDriverFixture provides convenience methods for automating mainframe
  * functional tests. It consists of an API to deal with mainframe fields in
@@ -43,10 +51,16 @@ import org.slf4j.LoggerFactory;
  *
  * @see <a href="http://x3270.bgp.nu/">http://x3270.bgp.nu/</a>
  */
-public class HostDriverFixture {
+public class HostDriverFixture implements TestRunListener, TestRunReportable {
+
     private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
+
     private Connection connection;
     private TerminalMode mode;
+    private String pathName = "./logs";
+    private String type = "html";
+    private FilenameHelper filenameHelper = new FilenameHelper();
+    private String runningTest = null;
 
     public HostDriverFixture() {
         this.connection = new Connection();
@@ -317,7 +331,6 @@ public class HostDriverFixture {
             throw new RuntimeException(
                     "Row: " + line + " is greater than the specified max column size " + mode.getMaxColumn());
         }
-
         LineReader lineReader = new LineReader();
         return lineReader.readSingleLineWidth(line, locator);
     }
@@ -413,6 +426,48 @@ public class HostDriverFixture {
         waiting(100);
         connection.doCommand(command);
         connection.doCommand("ascii"); // just to see if typed in successfully.
+    }
+
+    private void takeScreenshot(String filenameBase) {
+        String testcase = getCurrentTestCase();
+        String filename = filenameHelper.constructFilename(pathName, testcase, filenameBase, type);
+        String filePath = StringUtils.substringBeforeLast(filename, "/");
+        try {
+            FileUtils.mkdir(new File(filePath), true);
+        } catch (IOException e) {
+            logger.error("Something went wrong while creating test files: ", e);
+        }
+        Result result = connection.doCommand("PrintText html modi " + filename);
+        if (result.getResultOfCommand().equals("ok")) {
+            logger.info("Wrote screenshot to file='{}'.", filename);
+        } else {
+            logger.warn("An Error occured while taking screenshots. Could not write screenshot to file='{}'.",
+                    filename);
+        }
+    }
+
+    @Override
+    public void initWithReporter(TestRunReporter reporter) {
+        reporter.addListener(this);
+    }
+
+    private String getCurrentTestCase() {
+        return runningTest != null ? runningTest : "UNKNOWN_TEST";
+    }
+
+    @Override
+    public void reported(SemanticUnit unit, Action action, String msg) {
+        if (unit == SemanticUnit.TEST && action == Action.ENTER) {
+            runningTest = msg;
+        }
+        if (screenshotShouldBeMade(unit, action, msg)) {
+            takeScreenshot(msg + '.' + action.name());
+        }
+    }
+
+    private boolean screenshotShouldBeMade(SemanticUnit unit, Action action, String msg) {
+        // configurable through maven build?
+        return ((action == Action.LEAVE) || unit == SemanticUnit.TEST) && connection.isConnected();
     }
 
 }
