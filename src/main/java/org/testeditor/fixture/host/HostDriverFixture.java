@@ -186,84 +186,10 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @see ControlCommand
      */
     @FixtureMethod
-    public void sendControlCommand(ControlCommand value) {
+    public void sendCommand(ControlCommand command) {
         waiting(100);
-        connection.doCommand(value.getCommand());
+        connection.doCommand(command.getCommand());
         connection.doCommand("ascii"); // just to see if typed in successfully.
-    }
-
-    /**
-     * Just for testing can be deleted when Enums working in Test-Editor .
-     * 
-     */
-    @FixtureMethod
-    public void send(String value) {
-        waiting(100);
-        connection.doCommand(value);
-        connection.doCommand("ascii"); // just to see if typed in successfully.
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) BACKTAB command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendBacktab() {
-        sendEmulationCommand(ControlCommand.BACKTAB.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) CLEAR command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendClear() {
-        sendEmulationCommand(ControlCommand.CLEAR.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) ENTER command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendEnter() {
-        sendEmulationCommand(ControlCommand.ENTER.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) ERASE_EOF command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendEraseEndOfField() {
-        sendEmulationCommand(ControlCommand.ERASE_EOF.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) ERASE_INPUT command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendEraseInput() {
-        sendEmulationCommand(ControlCommand.ERASE_INPUT.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) RESET command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendReset() {
-        sendEmulationCommand(ControlCommand.RESET.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) TAB command to the mainframe screen
-     * .
-     */
-    @FixtureMethod
-    public void sendTab() {
-        sendEmulationCommand(ControlCommand.TAB.getCommand());
     }
 
     /**
@@ -420,12 +346,6 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
                     "The result of delivered Host-Screen is not formatted, so it is not possible to get any information about fields!");
         }
         return allFieldAsString;
-    }
-
-    private void sendEmulationCommand(String command) {
-        waiting(100);
-        connection.doCommand(command);
-        connection.doCommand("ascii"); // just to see if typed in successfully.
     }
 
     private void takeScreenshot(String filenameBase) {
