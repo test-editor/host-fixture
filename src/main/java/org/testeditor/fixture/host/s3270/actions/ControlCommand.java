@@ -39,8 +39,8 @@ public enum ControlCommand {
             "Reset"), TAB("Tab");
     private String command;
 
-    private ControlCommand(String state) {
-        this.command = state;
+    private ControlCommand(String command) {
+        this.command = command;
     }
 
     public String getCommand() {
