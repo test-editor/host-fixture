@@ -57,7 +57,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
 
     private Connection connection;
     private TerminalMode mode;
-    private String pathName = "./logs";
+    private String pathName = "./screenshots";
     private String type = "html";
     private FilenameHelper filenameHelper = new FilenameHelper();
     private String runningTest = null;
