@@ -12,9 +12,8 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.locators;
 
-import org.testeditor.fixture.host.s3270.options.TerminalMode;
-
 import java.lang.reflect.Constructor;
+import org.testeditor.fixture.host.s3270.Status;
 
 /**
  * The LocatorByStartStop is a representation of a range on a Mainframe host
@@ -49,13 +48,13 @@ public class LocatorByStartStop implements Locator {
      * @param endColumn
      *            the end x position representation of a screen range
      */
-    public LocatorByStartStop(int startRow, int startColumn, int endRow, int endColumn, TerminalMode mode) {
+    public LocatorByStartStop(int startRow, int startColumn, int endRow, int endColumn, Status status) {
         this.startRow = startRow;
         this.startColumn = startColumn;
         this.endRow = endRow;
         this.endColumn = endColumn;
-        this.maxRow = mode.getMaxRow();
-        this.maxColumn = mode.getMaxColumn();
+        this.maxRow = status.getNumberRows();
+        this.maxColumn = status.getNumberColumns();
     }
 
     /**
@@ -74,9 +73,9 @@ public class LocatorByStartStop implements Locator {
      *            The start and end position representation of a screen range of
      *            a mainframe host screen.
      */
-    public LocatorByStartStop(String elementLocator, TerminalMode mode) {
-        this.maxRow = mode.getMaxRow();
-        this.maxColumn = mode.getMaxColumn();
+    public LocatorByStartStop(String elementLocator, Status status) {
+        this.maxRow = status.getNumberRows();
+        this.maxColumn = status.getNumberColumns();
         createLocatorByStartStop(elementLocator);
     }
 

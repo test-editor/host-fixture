@@ -1,17 +1,17 @@
 package org.testeditor.fixture.host.util;
 
-import org.testeditor.fixture.host.locators.LocatorByStartStop;
-import org.testeditor.fixture.host.locators.LocatorByWidth;
-import org.testeditor.fixture.host.s3270.options.TerminalMode;
-
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.testeditor.fixture.host.locators.LocatorByStartStop;
+import org.testeditor.fixture.host.locators.LocatorByWidth;
+import org.testeditor.fixture.host.s3270.Status;
 
 public class LineReaderTest {
+
+    private static Status status = new Status("U F U C(google.de) I 2 24 80 2 11 0x0 -");
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -23,7 +23,7 @@ public class LineReaderTest {
                 + " Coroneradmin = TROLL                                         Terminal - TM12345"
                 + " Menukey     = KANONE";
         String elementLocator = "0;0;2;20";
-        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -40,7 +40,7 @@ public class LineReaderTest {
         String expected = "_ ABC         PF 1      ABC                                                     "
                 + "_ DEF         PF 2      DEF";
         String elementLocator = "9;0;10;26";
-        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -71,8 +71,7 @@ public class LineReaderTest {
         int endRow = 17;
         int endColumn = 26;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn,
-                TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -93,8 +92,7 @@ public class LineReaderTest {
         int endRow = 23;
         int endColumn = 80;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn,
-                TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -115,8 +113,7 @@ public class LineReaderTest {
         int endRow = 23;
         int endColumn = 79;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn,
-                TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -137,8 +134,7 @@ public class LineReaderTest {
         int endRow = 24;
         int endColumn = 79;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn,
-                TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -159,8 +155,7 @@ public class LineReaderTest {
         int endRow = 23;
         int endColumn = 79;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn,
-                TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -180,8 +175,7 @@ public class LineReaderTest {
         int startColumn = 28;
         int endRow = 3;
         int endColumn = 34;
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn,
-                TerminalMode.MODE_24x80);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
         String line = lines.get(startRow);
@@ -202,7 +196,7 @@ public class LineReaderTest {
         int startRow = 7;
         int startColumn = 26;
         int width = 11;
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, TerminalMode.MODE_24x80);
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
         String line = lines.get(startRow);
@@ -225,7 +219,7 @@ public class LineReaderTest {
         int width = 8;
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("Your chosen row width '24' is greater than the actual maximum row width '23'");
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, TerminalMode.MODE_24x80);
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
 
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
@@ -244,7 +238,7 @@ public class LineReaderTest {
         int startRow = 3;
         int startColumn = 0;
         int width = 8;
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, TerminalMode.MODE_24x80);
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
 
         // when
         String line = "data: Menukey";
@@ -263,7 +257,7 @@ public class LineReaderTest {
         int width = 8;
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("Your chosen start column plus width '82' is greater than the maximum column size'79'");
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, TerminalMode.MODE_24x80);
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
         String line = lines.get(startRow);

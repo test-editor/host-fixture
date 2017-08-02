@@ -18,8 +18,8 @@ import org.junit.Test;
 public class ConnectionTest {
 
     @Test
-    public void testLinkedListSpyCorrect() throws IOException {
-        //
+    public void testConnectionWithData() throws IOException {
+        // given
         Connection con = new Connection(mock(Process.class), "test", mock(BufferedReader.class),
                 mock(PrintWriter.class));
         Connection spy = spy(con);
@@ -37,9 +37,36 @@ public class ConnectionTest {
 
         doReturn(datalines).when(spy).readOutput();
 
+        // when
         Result actualResult = spy.doCommand("test");
+
+        // then
         assertEquals("test1", actualResult.getDataLines().get(0));
-        assertEquals("ok", actualResult.getStatusString());
+        assertEquals("U F U C(abcdefg.google.mainframe.de) I 2 24 80 3 9 0x0 -", actualResult.getStatusString());
+        assertEquals("ok", actualResult.getResultOfCommand());
+    }
+
+    @Test
+    public void testConnectionWithoutData() throws IOException {
+        // given
+        Connection con = new Connection(mock(Process.class), "test", mock(BufferedReader.class),
+                mock(PrintWriter.class));
+        Connection spy = spy(con);
+
+        // You have to use doReturn() for stubbing
+        List<String> datalines = new ArrayList<String>();
+        datalines.add("U F U C(abcdefg.google.mainframe.de) I 2 24 80 3 9 0x0 -");
+        datalines.add("ok");
+
+        doReturn(datalines).when(spy).readOutput();
+
+        // when
+        Result actualResult = spy.doCommand("test");
+
+        // then
+        assertEquals(0, actualResult.getDataLines().size());
+        assertEquals("U F U C(abcdefg.google.mainframe.de) I 2 24 80 3 9 0x0 -", actualResult.getStatusString());
+        assertEquals("ok", actualResult.getResultOfCommand());
     }
 
 }

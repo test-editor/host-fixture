@@ -12,7 +12,20 @@
  *******************************************************************************/
 package org.testeditor.fixture.host;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.TestRunListener;
+import org.testeditor.fixture.core.TestRunReportable;
+import org.testeditor.fixture.core.TestRunReporter;
+import org.testeditor.fixture.core.TestRunReporter.Action;
+import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 import org.testeditor.fixture.core.interaction.FixtureMethod;
+import org.testeditor.fixture.core.logging.FilenameHelper;
 import org.testeditor.fixture.host.locators.LocatorByStart;
 import org.testeditor.fixture.host.locators.LocatorByStartStop;
 import org.testeditor.fixture.host.locators.LocatorByWidth;
@@ -25,12 +38,10 @@ import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
 import org.testeditor.fixture.host.s3270.statusformat.FieldProtection;
+import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
+import org.testeditor.fixture.host.screen.Field;
+import org.testeditor.fixture.host.screen.TerminalScreen;
 import org.testeditor.fixture.host.util.LineReader;
-
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * HostDriverFixture provides convenience methods for automating mainframe
@@ -40,10 +51,16 @@ import org.slf4j.LoggerFactory;
  *
  * @see <a href="http://x3270.bgp.nu/">http://x3270.bgp.nu/</a>
  */
-public class HostDriverFixture {
+public class HostDriverFixture implements TestRunListener, TestRunReportable {
+
     private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
+
     private Connection connection;
-    private TerminalMode mode;
+    private TerminalMode terminalMode = TerminalMode.MODE_24x80;
+    private String pathName = "./screenshots";
+    private String type = "html";
+    private FilenameHelper filenameHelper = new FilenameHelper();
+    private String runningTest = null;
 
     public HostDriverFixture() {
         this.connection = new Connection();
@@ -69,9 +86,8 @@ public class HostDriverFixture {
     public boolean connect(String s3270Path, String hostname, int port) {
         logger.info("Host-Fixture connecting ...");
         TerminalType type = TerminalType.TYPE_3279;
-        this.mode = TerminalMode.MODE_24x80;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
-        connection.connect(s3270Path, hostname, port, type, this.mode, charSet);
+        connection.connect(s3270Path, hostname, port, type, terminalMode, charSet);
         if (connection.isConnected()) {
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
@@ -143,7 +159,7 @@ public class HostDriverFixture {
     @FixtureMethod
     public void typeAt(String elementLocator, LocatorStrategy locatorType, String value) {
         Result result = moveCursor(elementLocator, locatorType);
-        result.createStatus();
+        result.logStatus();
         Status status = result.getStatus();
         if (status.getFieldProtection() == FieldProtection.UNPROTECTED) {
             waiting(100);
@@ -169,84 +185,10 @@ public class HostDriverFixture {
      * @see ControlCommand
      */
     @FixtureMethod
-    public void sendControlCommand(ControlCommand value) {
+    public void sendCommand(ControlCommand command) {
         waiting(100);
-        connection.doCommand(value.getCommand());
+        connection.doCommand(command.getCommand());
         connection.doCommand("ascii"); // just to see if typed in successfully.
-    }
-
-    /**
-     * Just for testing can be deleted when Enums working in Test-Editor .
-     * 
-     */
-    @FixtureMethod
-    public void send(String value) {
-        waiting(100);
-        connection.doCommand(value);
-        connection.doCommand("ascii"); // just to see if typed in successfully.
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) BACKTAB command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendBacktab() {
-        sendEmulationCommand(ControlCommand.BACKTAB.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) CLEAR command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendClear() {
-        sendEmulationCommand(ControlCommand.CLEAR.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) ENTER command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendEnter() {
-        sendEmulationCommand(ControlCommand.ENTER.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) ERASE_EOF command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendEraseEndOfField() {
-        sendEmulationCommand(ControlCommand.ERASE_EOF.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) ERASE_INPUT command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendEraseInput() {
-        sendEmulationCommand(ControlCommand.ERASE_INPUT.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) RESET command to the mainframe
-     * screen .
-     */
-    @FixtureMethod
-    public void sendReset() {
-        sendEmulationCommand(ControlCommand.RESET.getCommand());
-    }
-
-    /**
-     * Sends a (see {@link ControlCommand}) TAB command to the mainframe screen
-     * .
-     */
-    @FixtureMethod
-    public void sendTab() {
-        sendEmulationCommand(ControlCommand.TAB.getCommand());
     }
 
     /**
@@ -270,15 +212,16 @@ public class HostDriverFixture {
     protected String getElement(String elementLocator, LocatorStrategy locatorType) {
         logger.info("Lookup element {} type {}", elementLocator, locatorType.name());
         String result = null;
+        Status status = getStatus();
         switch (locatorType) {
         case START_STOP:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, mode));
+            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status));
             break;
         case WIDTH:
-            result = getValueByWidth(new LocatorByWidth(elementLocator, mode));
+            result = getValueByWidth(new LocatorByWidth(elementLocator, status));
             break;
         default:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, mode));
+            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status));
             break;
         }
         return result;
@@ -287,14 +230,15 @@ public class HostDriverFixture {
     private String getValueByStartStop(LocatorByStartStop locator) {
         Result result = connection.doCommand("ascii");
         List<String> dataLines = result.getDataLines();
+        Status status = result.getStatus();
         StringBuffer sb = new StringBuffer();
         // When only one row is available
         if (locator.getStartRow() == locator.getEndRow()) {
             String line = dataLines.get(locator.getStartRow());
             line = LineReader.extracted(line);
-            if (LineReader.extracted(line).length() > mode.getMaxColumn()) {
+            if (LineReader.extracted(line).length() > status.getNumberColumns()) {
                 throw new RuntimeException(
-                        "Row: " + line + " is greater than the specified max column size " + mode.getMaxColumn());
+                        "Row: " + line + " is greater than the specified max column size " + status.getNumberColumns());
             }
             LineReader lineReader = new LineReader();
             sb.append(lineReader.readSingleLine(line, locator));
@@ -308,13 +252,13 @@ public class HostDriverFixture {
 
     private String getValueByWidth(LocatorByWidth locator) {
         Result result = connection.doCommand("ascii");
+        Status status = result.getStatus();
         List<String> dataLines = result.getDataLines();
         String line = dataLines.get(locator.getStartRow());
-        if (LineReader.extracted(line).length() > mode.getMaxColumn()) {
+        if (LineReader.extracted(line).length() > status.getNumberColumns()) {
             throw new RuntimeException(
-                    "Row: " + line + " is greater than the specified max column size " + mode.getMaxColumn());
+                    "Row: " + line + " is greater than the specified max column size " + status.getNumberColumns());
         }
-
         LineReader lineReader = new LineReader();
         return lineReader.readSingleLineWidth(line, locator);
     }
@@ -345,27 +289,121 @@ public class HostDriverFixture {
     @FixtureMethod
     public Result moveCursor(String elementLocator, LocatorStrategy locatorType) {
         Result result = null;
+        Status status = getStatus();
         switch (locatorType) {
         case START:
-            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, mode);
+            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status);
             result = setCursorPosition(locatorByStart.getStartRow(), locatorByStart.getStartColumn());
             break;
         case START_STOP:
-            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, mode);
+            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status);
             result = setCursorPosition(locatorByStartStop.getStartRow(), locatorByStartStop.getStartColumn());
             break;
         case WIDTH:
-            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, mode);
+            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status);
             result = setCursorPosition(locatorByWidth.getStartRow(), locatorByWidth.getStartColumn());
             break;
         }
         return result;
     }
 
-    private void sendEmulationCommand(String command) {
-        waiting(100);
-        connection.doCommand(command);
-        connection.doCommand("ascii"); // just to see if typed in successfully.
+    /**
+     * Prints all {@link Field}s of a mainframe ScreenBuffer in the form:
+     * 
+     * <pre>
+     * |----------------------------------------------------------------------------------------------------------------------------------------------|
+     * |Nr |row|field|width|colStart|colEnd|numeric|protected|hidden|value                                                                           
+     * |----------------------------------------------------------------------------------------------------------------------------------------------|
+     * |1  |0  |1    |4    |1       |4     |       |true     |false | 'z/OS'                                                                         
+     * |2  |0  |2    |10   |6       |15    |       |false    |false | ' Z18 Level'                                                                   
+     * |3  |0  |3    |5    |17      |21    |true   |false    |false | ' 0609'                                                                        
+     * |4  |0  |4    |31   |23      |53    |       |false    |true  | '                               '                                              
+     * |5  |0  |5    |24   |55      |78    |       |false    |false | 'IP Address = 78.51.59.98'                                                     
+     * |6  |0  |6    |6    |80      |85    |       |false    |false | '
+     * ...
+     * </pre>
+     * 
+     * <strong>Caution:</strong> But before it will be verified, if the result
+     * of ScreenBuffer is formatted. If the application program uses field
+     * attributes to define fields on the screen, then the screen is formatted.
+     * If there are no fields defined on the screen, then the screen is
+     * unformatted, and the operator uses it in free-form manner.
+     * 
+     * @return The String reprentation of all found {@link Field}s in
+     *         ScreenBuffer.
+     */
+    @FixtureMethod
+    public String buildAllFieldsAsString() {
+        String allFieldAsString = null;
+        Result result = connection.doCommand("ReadBuffer(Ascii)");
+        Status status = result.getStatus();
+        ScreenFormatting screenFormatting = status.getScreenFormatting();
+        // Check if ScreenBuffer is formatted !
+        int maxWaitCounter = 0;
+        while (screenFormatting != ScreenFormatting.FORMATTED) {
+            waiting(500);
+            maxWaitCounter++;
+            logger.debug("waiting 500 ms ...");
+            result = connection.doCommand("ReadBuffer(Ascii)");
+            status = result.getStatus();
+            screenFormatting = status.getScreenFormatting();
+            // Wait maximal 30 seconds that screen is formatted
+            if (maxWaitCounter > 60) {
+                break;
+            }
+        }
+        if (screenFormatting == ScreenFormatting.FORMATTED) {
+            TerminalScreen screen = new TerminalScreen();
+            allFieldAsString = screen.printAllFieldAsString(result.getDataLines());
+            logger.info(allFieldAsString);
+
+        } else {
+            throw new RuntimeException(
+                    "The result of delivered Host-Screen is not formatted, so it is not possible to get any information about fields!");
+        }
+        return allFieldAsString;
+    }
+
+    private void takeScreenshot(String filenameBase) {
+        String testcase = getCurrentTestCase();
+        String filename = filenameHelper.constructFilename(pathName, testcase, filenameBase, type);
+        String filePath = StringUtils.substringBeforeLast(filename, "/");
+        try {
+            FileUtils.mkdir(new File(filePath), true);
+        } catch (IOException e) {
+            logger.error("Something went wrong while creating test files: ", e);
+        }
+        Result result = connection.doCommand("PrintText html modi " + filename);
+        if (result.getResultOfCommand().equals("ok")) {
+            logger.info("Wrote screenshot to file='{}'.", filename);
+        } else {
+            logger.warn("An Error occured while taking screenshots. Could not write screenshot to file='{}'.",
+                    filename);
+        }
+    }
+
+    @Override
+    public void initWithReporter(TestRunReporter reporter) {
+        reporter.addListener(this);
+    }
+
+    private String getCurrentTestCase() {
+        return runningTest != null ? runningTest : "UNKNOWN_TEST";
+    }
+
+    @Override
+    public void reported(SemanticUnit unit, Action action, String msg) {
+        if (unit == SemanticUnit.TEST && action == Action.ENTER) {
+            runningTest = msg;
+        }
+        if (screenshotShouldBeMade(unit, action, msg)) {
+            takeScreenshot(msg + '.' + action.name());
+        }
+    }
+
+    private boolean screenshotShouldBeMade(SemanticUnit unit, Action action, String msg) {
+        // configurable through maven build?
+        return ((action == Action.LEAVE) || unit == SemanticUnit.TEST) && connection.isConnected();
     }
 
 }
