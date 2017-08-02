@@ -56,7 +56,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
 
     private Connection connection;
-    private TerminalMode mode;
+    private TerminalMode terminalMode = TerminalMode.MODE_24x80;
     private String pathName = "./screenshots";
     private String type = "html";
     private FilenameHelper filenameHelper = new FilenameHelper();
@@ -86,9 +86,8 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     public boolean connect(String s3270Path, String hostname, int port) {
         logger.info("Host-Fixture connecting ...");
         TerminalType type = TerminalType.TYPE_3279;
-        this.mode = TerminalMode.MODE_24x80;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
-        connection.connect(s3270Path, hostname, port, type, this.mode, charSet);
+        connection.connect(s3270Path, hostname, port, type, terminalMode, charSet);
         if (connection.isConnected()) {
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
@@ -213,15 +212,16 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     protected String getElement(String elementLocator, LocatorStrategy locatorType) {
         logger.info("Lookup element {} type {}", elementLocator, locatorType.name());
         String result = null;
+        Status status = getStatus();
         switch (locatorType) {
         case START_STOP:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, mode));
+            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status));
             break;
         case WIDTH:
-            result = getValueByWidth(new LocatorByWidth(elementLocator, mode));
+            result = getValueByWidth(new LocatorByWidth(elementLocator, status));
             break;
         default:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, mode));
+            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status));
             break;
         }
         return result;
@@ -230,14 +230,15 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     private String getValueByStartStop(LocatorByStartStop locator) {
         Result result = connection.doCommand("ascii");
         List<String> dataLines = result.getDataLines();
+        Status status = result.getStatus();
         StringBuffer sb = new StringBuffer();
         // When only one row is available
         if (locator.getStartRow() == locator.getEndRow()) {
             String line = dataLines.get(locator.getStartRow());
             line = LineReader.extracted(line);
-            if (LineReader.extracted(line).length() > mode.getMaxColumn()) {
+            if (LineReader.extracted(line).length() > status.getNumberColumns()) {
                 throw new RuntimeException(
-                        "Row: " + line + " is greater than the specified max column size " + mode.getMaxColumn());
+                        "Row: " + line + " is greater than the specified max column size " + status.getNumberColumns());
             }
             LineReader lineReader = new LineReader();
             sb.append(lineReader.readSingleLine(line, locator));
@@ -251,11 +252,12 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
 
     private String getValueByWidth(LocatorByWidth locator) {
         Result result = connection.doCommand("ascii");
+        Status status = result.getStatus();
         List<String> dataLines = result.getDataLines();
         String line = dataLines.get(locator.getStartRow());
-        if (LineReader.extracted(line).length() > mode.getMaxColumn()) {
+        if (LineReader.extracted(line).length() > status.getNumberColumns()) {
             throw new RuntimeException(
-                    "Row: " + line + " is greater than the specified max column size " + mode.getMaxColumn());
+                    "Row: " + line + " is greater than the specified max column size " + status.getNumberColumns());
         }
         LineReader lineReader = new LineReader();
         return lineReader.readSingleLineWidth(line, locator);
@@ -287,17 +289,18 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     @FixtureMethod
     public Result moveCursor(String elementLocator, LocatorStrategy locatorType) {
         Result result = null;
+        Status status = getStatus();
         switch (locatorType) {
         case START:
-            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, mode);
+            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status);
             result = setCursorPosition(locatorByStart.getStartRow(), locatorByStart.getStartColumn());
             break;
         case START_STOP:
-            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, mode);
+            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status);
             result = setCursorPosition(locatorByStartStop.getStartRow(), locatorByStartStop.getStartColumn());
             break;
         case WIDTH:
-            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, mode);
+            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status);
             result = setCursorPosition(locatorByWidth.getStartRow(), locatorByWidth.getStartColumn());
             break;
         }
