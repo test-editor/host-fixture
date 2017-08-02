@@ -57,7 +57,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
 
     private Connection connection;
     private TerminalMode mode;
-    private String pathName = "./logs";
+    private String pathName = "./screenshots";
     private String type = "html";
     private FilenameHelper filenameHelper = new FilenameHelper();
     private String runningTest = null;
@@ -336,6 +336,19 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         Status status = result.getStatus();
         ScreenFormatting screenFormatting = status.getScreenFormatting();
         // Check if ScreenBuffer is formatted !
+        int maxWaitCounter = 0;
+        while (screenFormatting != ScreenFormatting.FORMATTED) {
+            waiting(500);
+            maxWaitCounter++;
+            logger.debug("waiting 500 ms ...");
+            result = connection.doCommand("ReadBuffer(Ascii)");
+            status = result.getStatus();
+            screenFormatting = status.getScreenFormatting();
+            // Wait maximal 30 seconds that screen is formatted
+            if (maxWaitCounter > 60) {
+                break;
+            }
+        }
         if (screenFormatting == ScreenFormatting.FORMATTED) {
             TerminalScreen screen = new TerminalScreen();
             allFieldAsString = screen.printAllFieldAsString(result.getDataLines());
