@@ -8,10 +8,13 @@ import org.junit.rules.ExpectedException;
 import org.testeditor.fixture.host.locators.LocatorByStartStop;
 import org.testeditor.fixture.host.locators.LocatorByWidth;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.screen.Offset;
 
 public class LineReaderTest {
 
-    private static Status status = new Status("U F U C(google.de) I 2 24 80 2 11 0x0 -");
+    private static Status status = new Status("U F U C(google.de) I 2 24 80 2 11 0x0 -", new Offset(1, 1));
+    private int offsetRow = -1;
+    private int offsetColumn = -1;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -22,8 +25,8 @@ public class LineReaderTest {
         String expected = " 01/01/2000 14:27:36        AMD MENUE FOR ABCDEFGHIJ          Panelid  - PAN1234"
                 + " Coroneradmin = TROLL                                         Terminal - TM12345"
                 + " Menukey     = KANONE";
-        String elementLocator = "0;0;2;20";
-        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, status);
+        String elementLocator = "1;1;3;21";
+        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, status, offsetRow, offsetColumn);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -39,8 +42,8 @@ public class LineReaderTest {
     public void readTwoLinesTest() {
         String expected = "_ ABC         PF 1      ABC                                                     "
                 + "_ DEF         PF 2      DEF";
-        String elementLocator = "9;0;10;26";
-        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, status);
+        String elementLocator = "10;1;11;27";
+        LocatorByStartStop locator = new LocatorByStartStop(elementLocator, status, offsetRow, offsetColumn);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -66,12 +69,13 @@ public class LineReaderTest {
                 + "_ ZKI         PF 8      ZKI                                                     "
                 + "_ CBA         PF 9      CBA";
 
-        int startRow = 9;
-        int startColumn = 2;
-        int endRow = 17;
-        int endColumn = 26;
+        int startRow = 10;
+        int startColumn = 3;
+        int endRow = 18;
+        int endColumn = 27;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status, offsetRow,
+                offsetColumn);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
 
@@ -84,87 +88,79 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readMultipleLinesColumnFailureTest() {
+    public void readMultipleLinesEndColumnFailureTest() {
 
         // given
         int startRow = 0;
         int startColumn = 0;
         int endRow = 23;
-        int endColumn = 80;
-
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
-        HostScreen hostScreen = new HostScreen();
-        List<String> lines = hostScreen.createHostScreen();
-
-        // when
-        LineReader lineReader = new LineReader();
+        int endColumn = 81;
 
         thrown.expect(RuntimeException.class);
-        thrown.expectMessage("Your chosen column '80' is greater than the maximum column '79'");
-        lineReader.readMultilines(lines, locator);
+        thrown.expectMessage("Your chosen column '81' is greater than the maximum column '80'");
+
+        // when
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status, offsetRow,
+                offsetColumn);
+
+        // then
+        // expected RuntimeException will be thrown.
     }
 
     @Test
     public void readMultipleLinesStartColumnFailureTest() {
 
         // given
-        int startRow = 0;
-        int startColumn = 80;
+        int startRow = 1;
+        int startColumn = 81;
         int endRow = 23;
         int endColumn = 79;
-
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
-        HostScreen hostScreen = new HostScreen();
-        List<String> lines = hostScreen.createHostScreen();
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("Your chosen column '81' is greater than the maximum column '80'");
 
         // when
-        LineReader lineReader = new LineReader();
+        new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status, offsetRow, offsetColumn);
 
-        thrown.expect(RuntimeException.class);
-        thrown.expectMessage("Your chosen column '80' is greater than the maximum column '79'");
-        lineReader.readMultilines(lines, locator);
+        // then
+        // expected RuntimeException will be thrown.
     }
 
     @Test
     public void readMultipleLinesRowFailureTest() {
 
         // given
-        int startRow = 0;
-        int startColumn = 0;
-        int endRow = 24;
+        int startRow = 1;
+        int startColumn = 1;
+        int endRow = 25;
         int endColumn = 79;
 
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
-        HostScreen hostScreen = new HostScreen();
-        List<String> lines = hostScreen.createHostScreen();
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("Your chosen row '25' is greater than the maximum row '24'");
 
         // when
-        LineReader lineReader = new LineReader();
-
-        thrown.expect(RuntimeException.class);
-        thrown.expectMessage("Your chosen row '24' is greater than the maximum row '23'");
-        lineReader.readMultilines(lines, locator);
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status, offsetRow,
+                offsetColumn);
+        // then
+        // expected RuntimeException will be thrown.
     }
 
     @Test
     public void readMultipleLinesStartRowFailureTest() {
 
         // given
-        int startRow = 24;
-        int startColumn = 0;
+        int startRow = 25;
+        int startColumn = 1;
         int endRow = 23;
         int endColumn = 79;
-
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
-        HostScreen hostScreen = new HostScreen();
-        List<String> lines = hostScreen.createHostScreen();
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("Your chosen row '25' is greater than the maximum row '24'");
 
         // when
-        LineReader lineReader = new LineReader();
+        new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status, offsetRow, offsetColumn);
 
-        thrown.expect(RuntimeException.class);
-        thrown.expectMessage("Your chosen row '24' is greater than the maximum row '23'");
-        lineReader.readMultilines(lines, locator);
+        // then
+        // expected RuntimeException will be thrown.
+
     }
 
     @Test
@@ -172,10 +168,11 @@ public class LineReaderTest {
         // given
         String expected = "Printer";
         int startRow = 3;
-        int startColumn = 28;
+        int startColumn = 29;
         int endRow = 3;
-        int endColumn = 34;
-        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status);
+        int endColumn = 35;
+        LocatorByStartStop locator = new LocatorByStartStop(startRow, startColumn, endRow, endColumn, status, offsetRow,
+                offsetColumn);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
         String line = lines.get(startRow);
@@ -193,13 +190,13 @@ public class LineReaderTest {
 
         // given
         String expected = "Description";
-        int startRow = 7;
-        int startColumn = 26;
+        int startRow = 8;
+        int startColumn = 27;
         int width = 11;
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offsetRow, offsetColumn);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
-        String line = lines.get(startRow);
+        String line = lines.get(locator.getStartRowWithOffset());
 
         // when
         LineReader lineReader = new LineReader();
@@ -214,16 +211,16 @@ public class LineReaderTest {
 
         // given
 
-        int startRow = 24;
-        int startColumn = 0;
+        int startRow = 25;
+        int startColumn = 1;
         int width = 8;
         thrown.expect(RuntimeException.class);
-        thrown.expectMessage("Your chosen row width '24' is greater than the actual maximum row width '23'");
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
+        thrown.expectMessage("Your chosen row width '25' is greater than the actual maximum row width '24'");
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offsetRow, offsetColumn);
 
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
-        String line = lines.get(startRow);
+        String line = lines.get(startRow + locator.getOffsetRow());
 
         // when
         // String line = "data: Menukey";
@@ -238,7 +235,7 @@ public class LineReaderTest {
         int startRow = 3;
         int startColumn = 0;
         int width = 8;
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offsetRow, offsetColumn);
 
         // when
         String line = "data: Menukey";
@@ -256,8 +253,8 @@ public class LineReaderTest {
         int startColumn = 74;
         int width = 8;
         thrown.expect(RuntimeException.class);
-        thrown.expectMessage("Your chosen start column plus width '82' is greater than the maximum column size'79'");
-        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status);
+        thrown.expectMessage("Your chosen start column plus width '82' is greater than the maximum column size'80'");
+        LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offsetRow, offsetColumn);
         HostScreen hostScreen = new HostScreen();
         List<String> lines = hostScreen.createHostScreen();
         String line = lines.get(startRow);

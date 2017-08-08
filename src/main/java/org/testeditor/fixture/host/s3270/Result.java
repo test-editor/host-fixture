@@ -13,9 +13,9 @@
 package org.testeditor.fixture.host.s3270;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.host.screen.Offset;
 
 /**
  * Represents the result of an s3270 / ws3270 command.
@@ -40,6 +40,8 @@ public class Result {
      * The resultOfCommand can only be "ok" or "error"
      */
     private String resultOfCommand;
+    private int offsetRow;
+    private int offsetColumn;
 
     /**
      * 
@@ -51,12 +53,30 @@ public class Result {
      * @param resultOfCommand
      *            String "ok" for command was executed succesfully, "error"
      *            otherwise.
+     * @param offsetRow
+     *            The offsetRow for the screen origin. Default for the x3270
+     *            driver is that the row and column are zero-origin (0;0), that
+     *            means the begin point is at row 0 and column 0. The offsetRow
+     *            will rearrange the startpoint around the value for the row .
+     * @param offsetColumn
+     *            The offsetColumn for the screen origin. Default for the x3270
+     *            driver is that the row and column are zero-origin (0;0), that
+     *            means the begin point is at row 0 and column 0. The
+     *            offsetColumn will rearrange the startpoint around the value
+     *            for the column.
      */
-    public Result(final List<String> dataLines, final String statusString, String resultOfCommand) {
+    public Result(final List<String> dataLines, final String statusString, String resultOfCommand, Offset offset) {
         this.dataLines = dataLines;
         this.statusString = statusString;
         this.resultOfCommand = resultOfCommand;
-        this.status = new Status(statusString);
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
+        Status statusOriginal = new Status(statusString, offset);
+        int currentRowOriginal = statusOriginal.getCurrentCursorRow();
+        int currentColumnOriginal = statusOriginal.getCurrentCursorColumn();
+        statusOriginal.setCurrentCursorColumn(currentColumnOriginal + (-offsetColumn));
+        statusOriginal.setCurrentCursorRow(currentRowOriginal + (-offsetRow));
+        this.status = statusOriginal;
     }
 
     public List<String> getDataLines() {

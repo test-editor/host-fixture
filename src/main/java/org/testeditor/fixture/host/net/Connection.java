@@ -12,12 +12,6 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.net;
 
-import org.testeditor.fixture.host.s3270.Result;
-import org.testeditor.fixture.host.s3270.Status;
-import org.testeditor.fixture.host.s3270.options.CharacterSet;
-import org.testeditor.fixture.host.s3270.options.TerminalMode;
-import org.testeditor.fixture.host.s3270.options.TerminalType;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,9 +23,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.host.s3270.Result;
+import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.s3270.actions.Command;
+import org.testeditor.fixture.host.s3270.options.CharacterSet;
+import org.testeditor.fixture.host.s3270.options.TerminalMode;
+import org.testeditor.fixture.host.s3270.options.TerminalType;
+import org.testeditor.fixture.host.screen.Offset;
 
 public class Connection {
 
@@ -54,6 +54,8 @@ public class Connection {
      */
     private BufferedReader in = null;
 
+    private Offset offset;
+
     public Connection() {
         // Default Constructor
     }
@@ -61,11 +63,12 @@ public class Connection {
     /**
      * This Constructor is for test purposes
      */
-    public Connection(Process s3270Process, String hostname, BufferedReader in, PrintWriter out) {
+    public Connection(Process s3270Process, String hostname, BufferedReader in, PrintWriter out, Offset offset) {
         this.s3270Process = s3270Process;
         this.hostname = hostname;
         this.in = in;
         this.out = out;
+        this.offset = offset;
     }
 
     /**
@@ -87,8 +90,9 @@ public class Connection {
      *
      */
     public Connection connect(String s3270Path, String hostname, int port, TerminalType type, TerminalMode mode,
-            CharacterSet charSet) {
+            CharacterSet charSet, Offset offset) {
         this.hostname = hostname;
+        this.offset = offset;
         String commandLine = String.format("%s -charset %s -model %s-%d %s:%d -utf8", s3270Path, charSet.getCharSet(),
                 type.getType(), mode.getMode(), hostname, port);
         try {
@@ -199,37 +203,39 @@ public class Connection {
      * A s3270 command will be executed with this method. The whole
      * communication with s3270 will be accessed through this method.
      */
-    public Result doCommand(final String command) {
+    public Result doCommand(final String commandString, Command command) {
         assertProcessAvailable();
         try {
-            out.println(command);
+            out.println(commandString);
             out.flush();
             logger.debug(
                     "************************************************************************************************");
-            logger.debug("---> Command sent: '{}'", command);
-            if (command.equals("ascii")) {
+            logger.debug("---> Command sent: '{}'", command.getActionForLog());
+            if (commandString.equals("ascii")) {
                 logger.debug(
-                        "-------------- 0----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8");
+                        "--------------0----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8");
             }
             List<String> lines = readOutput();
             int size = lines.size();
             if (size > 1) {
-                Result result = new Result(lines.subList(0, size - 2), lines.get(size - 2), lines.get(size - 1));
+                Result result = new Result(lines.subList(0, size - 2), lines.get(size - 2), lines.get(size - 1),
+                        offset);
                 logger.debug(
                         "************************************************************************************************");
                 return result;
             } else {
-                throw new RuntimeException("no status received in command: " + command);
+                throw new RuntimeException("no status received in command: " + commandString);
             }
         } catch (final IOException ex) {
-            throw new RuntimeException("IOException during command: " + command, ex);
+            throw new RuntimeException("IOException during command: " + commandString, ex);
         }
     }
 
     // TODO this should be private
     public List<String> readOutput() throws IOException {
         List<String> lines = new ArrayList<String>();
-        int lineNumber = 0;
+        ArrayList<String> linesForLogging = new ArrayList<String>();
+        int lineNumber = 1;
         while (true) {
             String line = in.readLine();
             if (line == null) {
@@ -238,13 +244,49 @@ public class Connection {
                 throw new RuntimeException("s3270 process not responding");
             }
             String number = createNumber(lineNumber);
-            logger.debug("<--- {} '{}'", number, line);
+            linesForLogging.add("<--- " + number + " '" + line + "'");
             lines.add(line);
             lineNumber++;
-            if (line.equals("ok")) {
+            if (line.equals("ok") || line.equals("error")) {
                 break;
             }
         }
+        logOutput(linesForLogging);
+        return lines;
+    }
+
+    private void logOutput(List<String> lines) {
+        List<String> considerPositionOffsetLines = considerPositionOffset(lines);
+
+        for (String line : considerPositionOffsetLines) {
+            logger.debug(line);
+        }
+
+    }
+
+    private List<String> considerPositionOffset(List<String> lines) {
+        int sizeOfLines = lines.size();
+        int statusStringLine = sizeOfLines - 2;
+        StringBuffer statusStringWithOffset = new StringBuffer();
+
+        String statusStringOriginal = lines.get(statusStringLine);
+        String[] statusString = statusStringOriginal.split("'");
+        String[] splittedStatusString = statusString[1].split(" ");
+        statusStringWithOffset.append(statusString[0] + "'");
+        for (int i = 0; i < splittedStatusString.length; i++) {
+            // This is the current Row of the StatusString
+            if (i == 8) {
+                statusStringWithOffset
+                        .append((Integer.parseInt(splittedStatusString[i]) - this.offset.getOffsetRow()) + " ");
+                // This is the current Column of the StatusString
+            } else if (i == 9) {
+                statusStringWithOffset
+                        .append((Integer.parseInt(splittedStatusString[i]) - this.offset.getOffsetColumn()) + " ");
+            } else {
+                statusStringWithOffset.append(splittedStatusString[i] + " ");
+            }
+        }
+        lines.set(statusStringLine, statusStringWithOffset.toString().trim() + "'");
         return lines;
     }
 
@@ -275,7 +317,8 @@ public class Connection {
      * @return Result of the command.
      */
     private Result doEmptyCommand() {
-        return doCommand("");
+        Command command = new Command("", "");
+        return doCommand("", command);
     }
 
     private void assertProcessAvailable() {

@@ -33,6 +33,7 @@ import org.testeditor.fixture.host.locators.LocatorStrategy;
 import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Result;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.s3270.actions.Command;
 import org.testeditor.fixture.host.s3270.actions.ControlCommand;
 import org.testeditor.fixture.host.s3270.options.CharacterSet;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
@@ -40,6 +41,7 @@ import org.testeditor.fixture.host.s3270.options.TerminalType;
 import org.testeditor.fixture.host.s3270.statusformat.FieldProtection;
 import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
 import org.testeditor.fixture.host.screen.Field;
+import org.testeditor.fixture.host.screen.Offset;
 import org.testeditor.fixture.host.screen.TerminalScreen;
 import org.testeditor.fixture.host.util.LineReader;
 
@@ -61,12 +63,14 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     private String type = "html";
     private FilenameHelper filenameHelper = new FilenameHelper();
     private String runningTest = null;
+    private int offsetRow;
+    private int offsetColumn;
 
     public HostDriverFixture() {
         this.connection = new Connection();
     }
 
-    protected HostDriverFixture(Connection connection) {
+    public HostDriverFixture(Connection connection) {
         this.connection = connection;
     }
 
@@ -81,13 +85,27 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            The hostname to be connected to.
      * @param port
      *            The port of the host to be connected to.
+     * @param offsetRow
+     *            The offsetRow for the screen origin. Default for the x3270
+     *            driver is that the row and column are zero-origin (0;0), that
+     *            means the begin point is at row 0 and column 0. The offsetRow
+     *            will rearrange the startpoint around the value for the row .
+     * @param offsetColumn
+     *            The offsetColumn for the screen origin. Default for the x3270
+     *            driver is that the row and column are zero-origin (0;0), that
+     *            means the begin point is at row 0 and column 0. The
+     *            offsetColumn will rearrange the startpoint around the value
+     *            for the column.
      */
     @FixtureMethod
-    public boolean connect(String s3270Path, String hostname, int port) {
+    public boolean connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) {
         logger.info("Host-Fixture connecting ...");
+        Offset offset = new Offset(-offsetRow, -offsetColumn);
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
         TerminalType type = TerminalType.TYPE_3279;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
-        connection.connect(s3270Path, hostname, port, type, terminalMode, charSet);
+        connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
         if (connection.isConnected()) {
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
@@ -138,8 +156,11 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     private void typeAtPosition(String value, int row, int col) {
         setCursorPosition(row, col);
         waiting(100);
-        connection.doCommand("String(\"" + value + "\")");
-        connection.doCommand("ascii"); // just to see if typed in successfully.
+        Command commandType = new Command("String", "String(\"" + value + "\")");
+        Command commandAscii = new Command("Ascii", "Ascii");
+        connection.doCommand("String(\"" + value + "\")", commandType);
+        connection.doCommand("ascii", commandAscii); // just to see if typed in
+                                                     // successfully.
     }
 
     /**
@@ -163,9 +184,11 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         Status status = result.getStatus();
         if (status.getFieldProtection() == FieldProtection.UNPROTECTED) {
             waiting(100);
-            connection.doCommand("String(\"" + value + "\")");
+            Command commandType = new Command("String", "String(\"" + value + "\")");
+            Command commandAscii = new Command("Ascii", "Ascii");
+            connection.doCommand("String(\"" + value + "\")", commandType);
             // just to see if typed in successfully.
-            connection.doCommand("ascii");
+            connection.doCommand("ascii", commandAscii);
         } else {
             throw new RuntimeException("The field at the position x = '" + status.getCurrentCursorColumn()
                     + "' and y = '" + status.getCurrentCursorRow() + "' is protected.");
@@ -187,8 +210,11 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     @FixtureMethod
     public void sendCommand(ControlCommand command) {
         waiting(100);
-        connection.doCommand(command.getCommand());
-        connection.doCommand("ascii"); // just to see if typed in successfully.
+        Command commandString = new Command(command.getCommand(), command.getCommand());
+        Command commandAscii = new Command("Ascii", "Ascii");
+        connection.doCommand(command.getCommand(), commandString);
+        connection.doCommand("ascii", commandAscii); // just to see if typed in
+                                                     // successfully.
     }
 
     /**
@@ -215,26 +241,29 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         Status status = getStatus();
         switch (locatorType) {
         case START_STOP:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status));
+            result = getValueByStartStop(
+                    new LocatorByStartStop(elementLocator, status, this.offsetRow, this.offsetColumn));
             break;
         case WIDTH:
-            result = getValueByWidth(new LocatorByWidth(elementLocator, status));
+            result = getValueByWidth(new LocatorByWidth(elementLocator, status, this.offsetRow, this.offsetColumn));
             break;
         default:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status));
+            result = getValueByStartStop(
+                    new LocatorByStartStop(elementLocator, status, this.offsetRow, this.offsetColumn));
             break;
         }
         return result;
     }
 
     private String getValueByStartStop(LocatorByStartStop locator) {
-        Result result = connection.doCommand("ascii");
+        Command commandAscii = new Command("Ascii", "Ascii");
+        Result result = connection.doCommand("ascii", commandAscii);
         List<String> dataLines = result.getDataLines();
         Status status = result.getStatus();
         StringBuffer sb = new StringBuffer();
         // When only one row is available
         if (locator.getStartRow() == locator.getEndRow()) {
-            String line = dataLines.get(locator.getStartRow());
+            String line = dataLines.get(locator.getStartRowWithOffset());
             line = LineReader.extracted(line);
             if (LineReader.extracted(line).length() > status.getNumberColumns()) {
                 throw new RuntimeException(
@@ -251,10 +280,11 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     }
 
     private String getValueByWidth(LocatorByWidth locator) {
-        Result result = connection.doCommand("ascii");
+        Command commandAscii = new Command("Ascii", "Ascii");
+        Result result = connection.doCommand("ascii", commandAscii);
         Status status = result.getStatus();
         List<String> dataLines = result.getDataLines();
-        String line = dataLines.get(locator.getStartRow());
+        String line = dataLines.get(locator.getStartRow() + this.offsetRow);
         if (LineReader.extracted(line).length() > status.getNumberColumns()) {
             throw new RuntimeException(
                     "Row: " + line + " is greater than the specified max column size " + status.getNumberColumns());
@@ -272,7 +302,9 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     }
 
     private Result setCursorPosition(int row, int col) {
-        return connection.doCommand("MoveCursor(" + row + "," + col + ")");
+        Command command = new Command("MoveCursor",
+                "MoveCursor(" + (row - offsetRow) + "," + (col - offsetColumn) + ")", row, col);
+        return connection.doCommand("MoveCursor(" + row + "," + col + ")", command);
     }
 
     /**
@@ -284,7 +316,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            representation.
      * @param locatorType
      *            see {@link LocatorStrategy}
-     * @return {@link Result} of
+     * @return {@link Result} of the action.
      */
     @FixtureMethod
     public Result moveCursor(String elementLocator, LocatorStrategy locatorType) {
@@ -292,16 +324,22 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         Status status = getStatus();
         switch (locatorType) {
         case START:
-            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status);
-            result = setCursorPosition(locatorByStart.getStartRow(), locatorByStart.getStartColumn());
+            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status, this.offsetRow,
+                    this.offsetColumn);
+            result = setCursorPosition(locatorByStart.getStartRowWithOffset(),
+                    locatorByStart.getStartColumnWithOffset());
             break;
         case START_STOP:
-            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status);
-            result = setCursorPosition(locatorByStartStop.getStartRow(), locatorByStartStop.getStartColumn());
+            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status, this.offsetRow,
+                    this.offsetColumn);
+            result = setCursorPosition(locatorByStartStop.getStartRowWithOffset(),
+                    locatorByStartStop.getStartColumnWithOffset());
             break;
         case WIDTH:
-            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status);
-            result = setCursorPosition(locatorByWidth.getStartRow(), locatorByWidth.getStartColumn());
+            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status, this.offsetRow,
+                    this.offsetColumn);
+            result = setCursorPosition(locatorByWidth.getStartRowWithOffset(),
+                    locatorByWidth.getStartColumnWithOffset());
             break;
         }
         return result;
@@ -335,7 +373,8 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     @FixtureMethod
     public String buildAllFieldsAsString() {
         String allFieldAsString = null;
-        Result result = connection.doCommand("ReadBuffer(Ascii)");
+        Command command = new Command("ReadBuffer", "ReadBuffer(Ascii)");
+        Result result = connection.doCommand("ReadBuffer(Ascii)", command);
         Status status = result.getStatus();
         ScreenFormatting screenFormatting = status.getScreenFormatting();
         // Check if ScreenBuffer is formatted !
@@ -344,7 +383,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
             waiting(500);
             maxWaitCounter++;
             logger.debug("waiting 500 ms ...");
-            result = connection.doCommand("ReadBuffer(Ascii)");
+            result = connection.doCommand("ReadBuffer(Ascii)", command);
             status = result.getStatus();
             screenFormatting = status.getScreenFormatting();
             // Wait maximal 30 seconds that screen is formatted
@@ -373,7 +412,8 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         } catch (IOException e) {
             logger.error("Something went wrong while creating test files: ", e);
         }
-        Result result = connection.doCommand("PrintText html modi " + filename);
+        Command command = new Command("PrintText", "PrintText html modi " + filename);
+        Result result = connection.doCommand("PrintText html modi " + filename, command);
         if (result.getResultOfCommand().equals("ok")) {
             logger.info("Wrote screenshot to file='{}'.", filename);
         } else {
