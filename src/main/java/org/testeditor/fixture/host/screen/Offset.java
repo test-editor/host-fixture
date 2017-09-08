@@ -18,38 +18,16 @@ public class Offset {
     private int offsetColumn;
 
     public Offset(int offsetRow, int offsetColumn) {
-        this.setOffsetRow(offsetRow);
-        this.setOffsetColumn(offsetColumn);
+        this.offsetRow = offsetRow;
+        this.offsetColumn = offsetColumn;
     }
 
-    /**
-     * @return the offsetRow
-     */
     public int getOffsetRow() {
         return offsetRow;
     }
 
-    /**
-     * @param offsetRow
-     *            the offsetRow to set
-     */
-    public void setOffsetRow(int offsetRow) {
-        this.offsetRow = offsetRow;
-    }
-
-    /**
-     * @return the offsetColumn
-     */
     public int getOffsetColumn() {
         return offsetColumn;
-    }
-
-    /**
-     * @param offsetColumn
-     *            the offsetColumn to set
-     */
-    public void setOffsetColumn(int offsetColumn) {
-        this.offsetColumn = offsetColumn;
     }
 
 }

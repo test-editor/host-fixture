@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.host.logging.Logging;
 import org.testeditor.fixture.host.s3270.Result;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.actions.Command;
@@ -251,42 +252,7 @@ public class Connection {
                 break;
             }
         }
-        logOutput(linesForLogging);
-        return lines;
-    }
-
-    private void logOutput(List<String> lines) {
-        List<String> considerPositionOffsetLines = considerPositionOffset(lines);
-
-        for (String line : considerPositionOffsetLines) {
-            logger.debug(line);
-        }
-
-    }
-
-    private List<String> considerPositionOffset(List<String> lines) {
-        int sizeOfLines = lines.size();
-        int statusStringLine = sizeOfLines - 2;
-        StringBuffer statusStringWithOffset = new StringBuffer();
-
-        String statusStringOriginal = lines.get(statusStringLine);
-        String[] statusString = statusStringOriginal.split("'");
-        String[] splittedStatusString = statusString[1].split(" ");
-        statusStringWithOffset.append(statusString[0] + "'");
-        for (int i = 0; i < splittedStatusString.length; i++) {
-            // This is the current Row of the StatusString
-            if (i == 8) {
-                statusStringWithOffset
-                        .append((Integer.parseInt(splittedStatusString[i]) - this.offset.getOffsetRow()) + " ");
-                // This is the current Column of the StatusString
-            } else if (i == 9) {
-                statusStringWithOffset
-                        .append((Integer.parseInt(splittedStatusString[i]) - this.offset.getOffsetColumn()) + " ");
-            } else {
-                statusStringWithOffset.append(splittedStatusString[i] + " ");
-            }
-        }
-        lines.set(statusStringLine, statusStringWithOffset.toString().trim() + "'");
+        Logging.logOutput(linesForLogging, this.offset.getOffsetRow(), this.offset.getOffsetColumn());
         return lines;
     }
 
@@ -294,7 +260,6 @@ public class Connection {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.GERMAN);
         ((DecimalFormat) numberFormat).applyPattern("00");
         return numberFormat.format(new Integer(lineNumber));
-
     }
 
     /**

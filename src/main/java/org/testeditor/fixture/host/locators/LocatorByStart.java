@@ -13,7 +13,10 @@
 package org.testeditor.fixture.host.locators;
 
 import java.lang.reflect.Constructor;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.screen.Offset;
 
 /**
  * The LocatorByStartStop is a representation of a range on a mainframe host
@@ -54,15 +57,15 @@ public class LocatorByStart implements Locator {
      *            The offset for the startpoint column in dependence on the zero
      *            origin of the host screen.
      */
-    public LocatorByStart(int startRow, int startColumn, Status status, int offsetRow, int offsetColumn) {
+    public LocatorByStart(int startRow, int startColumn, Status status, Offset offset) {
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
         this.startRow = startRow;
         this.startRowWithOffset = startRow + offsetRow;
         this.startColumn = startColumn;
         this.startColumnWithOffset = startColumn + offsetColumn;
         this.maxRow = status.getCurrentCursorRow();
         this.maxColumn = status.getNumberColumns();
-        this.offsetRow = offsetRow;
-        this.offsetColumn = offsetColumn;
         checkBoundaries();
     }
 
@@ -89,26 +92,12 @@ public class LocatorByStart implements Locator {
      *            The offset for the startpoint column in dependence on the zero
      *            origin of the host screen.
      */
-    public LocatorByStart(String elementLocator, Status status, int offsetRow, int offsetColumn) {
+    public LocatorByStart(String elementLocator, Status status, Offset offset) {
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
-        this.offsetRow = offsetRow;
-        this.offsetColumn = offsetColumn;
-        createLocatorByStart(elementLocator);
-    }
-
-    /**
-     * @return the startColumn
-     */
-    public int getStartColumn() {
-        return startColumn;
-    }
-
-    /**
-     * @return the startRow
-     */
-    public int getStartRow() {
-        return startRow;
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
+        initializeStartRowAndColumn(elementLocator);
     }
 
     /**
@@ -133,36 +122,31 @@ public class LocatorByStart implements Locator {
      * @return {@link LocatorByStart} filled with the following fields:
      *         startRow, startColumn.
      */
-    private LocatorByStart createLocatorByStart(String elementLocator) {
-        String[] splittedValues = elementLocator.split(";");
-        if (splittedValues.length != 2) {
-            throw new RuntimeException("The number of arguments is '" + splittedValues.length
-                    + "' but should be '2' - locator: '" + elementLocator + "'");
-        }
-        if (splittedValues[0].matches("\\d+") && splittedValues[1].matches("\\d+")) {
-            this.startRow = Integer.parseInt(splittedValues[0]);
-            this.startRowWithOffset = (Integer.parseInt(splittedValues[0]) + this.offsetRow);
-            this.startColumn = Integer.parseInt(splittedValues[1]);
-            this.startColumnWithOffset = (Integer.parseInt(splittedValues[1]) + this.offsetColumn);
-
+    private void initializeStartRowAndColumn(String elementLocator) {
+        Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+)");
+        Matcher matcher = locatorPattern.matcher(elementLocator);
+        if (matcher.matches()) {
+            this.startRow = Integer.parseInt(matcher.group("startRow"));
+            this.startColumn = Integer.parseInt(matcher.group("startColumn"));
+            this.startRowWithOffset = this.startRow + this.offsetRow;
+            this.startColumnWithOffset = this.startColumn + this.offsetColumn;
+            checkBoundaries();
         } else {
-            throw new RuntimeException("One of your locator arguments is not an integer value: startRow'"
-                    + splittedValues[0] + "' startColumn'" + splittedValues[1]);
+            throw new IllegalArgumentException(
+                    "The provided locator did not match the expected pattern \"x;y\" where x and y are both integer values. Got: " + elementLocator);
         }
-        checkBoundaries();
-        return this;
     }
 
     @Override
     public void checkBoundaries() {
         // because we begin to count startColumn and startRow with 0
         if (startColumn > maxColumn) {
-            throw new RuntimeException("Your chosen column '" + startColumn + "' is greater than the maximum column '"
-                    + (maxColumn - 1) + "'");
+            String columnExceptionMessage = "Your chosen column '" + startColumn + "' is greater than the maximum column '" + (maxColumn - 1) + "'";
+            throw new IllegalArgumentException(columnExceptionMessage);
         }
         if (startRow > maxRow) {
-            throw new RuntimeException(
-                    "Your chosen row '" + startRow + "' is greater than the maximum row '" + maxRow + "'");
+            String rowExceptionMessage = "Your chosen row '" + startRow + "' is greater than the maximum row '" + maxRow + "'";
+            throw new IllegalArgumentException(rowExceptionMessage);
         }
     }
 

@@ -10,8 +10,8 @@ element type field {
 }
 
 interaction type connect {
-    template = "Connect to" ${hostname} "with port" ${port} "using s3270 from" ${s3270Path}     
-    method = HostDriverFixture.connect(s3270Path, hostname, port)
+    template = "Connect to" ${hostname} "with port" ${port} "using s3270 from" ${s3270Path} "with" ${rowOffset} "and" ${columnOffset}    
+    method = HostDriverFixture.connect(s3270Path, hostname, port, rowOffset, columnOffset)
 }
 
 interaction type disconnect {
