@@ -12,9 +12,8 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.locators;
 
-import org.testeditor.fixture.host.s3270.options.TerminalMode;
-
 import java.lang.reflect.Constructor;
+import org.testeditor.fixture.host.s3270.Status;
 
 /**
  * The Locator is a representation of a range on a Mainframe host screen.<br>
@@ -46,9 +45,9 @@ public class LocatorByWidth implements Locator {
      * @param width
      *            number of characters to be read.
      */
-    public LocatorByWidth(int startRow, int startColumn, int width, TerminalMode mode) {
-        this.maxRow = mode.getMaxRow();
-        this.maxColumn = mode.getMaxColumn();
+    public LocatorByWidth(int startRow, int startColumn, int width, Status status) {
+        this.maxRow = status.getNumberRows();
+        this.maxColumn = status.getNumberColumns();
         this.startColumn = startColumn;
         this.startRow = startRow;
         this.endColumn = startColumn + width;
@@ -68,9 +67,9 @@ public class LocatorByWidth implements Locator {
      *            represents the row, the second integer "5" represents the
      *            column and the third integer "34" represents the width..
      */
-    public LocatorByWidth(String elementLocator, TerminalMode mode) {
-        this.maxRow = mode.getMaxRow();
-        this.maxColumn = mode.getMaxColumn();
+    public LocatorByWidth(String elementLocator, Status status) {
+        this.maxRow = status.getNumberRows();
+        this.maxColumn = status.getNumberColumns();
         createLocatorByWidth(elementLocator);
     }
 

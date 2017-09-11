@@ -1,8 +1,8 @@
 plugins {
     id 'maven'
     id 'java'
-    id 'com.jfrog.bintray' version '1.7.2'
-    id 'net.researchgate.release' version '2.4.1'
+    id 'com.jfrog.bintray' version '1.7.3'
+    id 'net.researchgate.release' version '2.6.0'
     id 'org.xtext.xtend' version '1.0.17'
 }
 
@@ -20,7 +20,7 @@ test.testLogging.showStandardStreams = true
 
 
 dependencies {
-    compile 'org.testeditor.fixture:core-fixture:3.1.0'
+    compile 'org.testeditor.fixture:core-fixture:3.2.0'
     compile 'com.mashape.unirest:unirest-java:1.4.9'
     compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.google.guava:guava:21.0'
@@ -29,6 +29,9 @@ dependencies {
     testCompile 'com.github.tomakehurst:wiremock:2.6.0'
     testCompile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.11.0'
     testCompile 'com.google.truth:truth:0.31'
+    testCompile 'commons-codec:commons-codec:1.10'
+    testCompile 'org.apache.commons:commons-lang3:3.6'
+    
 }
     
 sourceSets.main.resources.srcDirs = [ "src/main/java" ]
@@ -57,20 +60,12 @@ install {
     }
 }
 
-/*
- * Configure release plugin.
- * Remove tasks "updateVersion" and "commitNewVersion" as we don't want the new SNAPSHOT
- * version commit on the master branch.
- */
-tasks.release.tasks -= ["updateVersion", "commitNewVersion"]
 release {
     preTagCommitMessage = '[release]'
     tagCommitMessage = '[release]'
     newVersionCommitMessage = '[release] new version'
     tagTemplate = 'v${version}'
 }
-
-afterReleaseBuild.dependsOn bintrayUpload
 
 bintray {
     user = System.getenv('BINTRAY_USER')
@@ -81,16 +76,12 @@ bintray {
         repo = 'Fixtures'
         name = project.name
         userOrg = 'test-editor'
-        websiteUrl = 'http://testeditor.org'
-        vcsUrl = "https://github.com/test-editor/${project.name}.git"
         licenses = ['EPL-1.0']
+        vcsUrl = "https://github.com/test-editor/${project.name}.git"
+        version {
+            name = project.version
+            vcsTag = "v$project.version"
+        }
+        websiteUrl = 'http://testeditor.org'
     }
 }
-
-bintrayUpload.doFirst {
-    // Version is changed during release, we need to set the proper version right before uploading
-    versionName = "$project.version"
-    versionVcsTag = "v$project.version"
-}    
-
-
