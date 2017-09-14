@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.s3270;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testeditor.fixture.host.exceptions.StatusNotFoundException;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.statusformat.ConnectionState;
@@ -19,9 +21,7 @@ import org.testeditor.fixture.host.s3270.statusformat.EmulatorMode;
 import org.testeditor.fixture.host.s3270.statusformat.FieldProtection;
 import org.testeditor.fixture.host.s3270.statusformat.KeyboardState;
 import org.testeditor.fixture.host.s3270.statusformat.ScreenFormatting;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.host.screen.Offset;
 
 /**
  * The returned status Information from s3270/ws3270 application after execution
@@ -52,12 +52,14 @@ public class Status {
     private int currentCursorColumn;
     private String windowId;
     private String executionTimeString;
+    private int offsetColumn;
+    private int offsetRow;
 
-    public Status(String status) {
-        createStatus(status);
+    public Status(String status, Offset offset) {
+        createStatus(status, offset);
     }
 
-    private void createStatus(String status) {
+    private void createStatus(String status, Offset offset) {
         String[] splittedStatus = status.split(" ");
         createKeyBoardState(splittedStatus[0]);
         createScreenFormatting(splittedStatus[1]);
@@ -71,6 +73,8 @@ public class Status {
         createCursorColumn(splittedStatus[9]);
         createWindowId(splittedStatus[10]);
         createCommandExecutionTime(splittedStatus[11]);
+        createOffset(offset);
+        createStatusStringWithOffset();
     }
 
     private void createKeyBoardState(String input) {
@@ -151,6 +155,28 @@ public class Status {
 
     private void createCommandExecutionTime(String input) {
         setCommanExecutionTime(input);
+    }
+
+    private void createOffset(Offset offset) {
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
+    }
+
+    private void createStatusStringWithOffset() {
+        StringBuffer statusString = new StringBuffer();
+        statusString.append(this.getKeyboardState() + " ");
+        statusString.append(getScreenFormatting() + " ");
+        statusString.append(getFieldProtection() + " ");
+        statusString.append(getConnectionState() + " ");
+        statusString.append(getEmulatorMode() + " ");
+        statusString.append(getMode() + " ");
+        statusString.append(getNumberRows() + " ");
+        statusString.append(getNumberColumns() + " ");
+        statusString.append((getCurrentCursorRow() + this.offsetRow) + " ");
+        statusString.append((getCurrentCursorColumn() + this.offsetColumn) + " ");
+        statusString.append(getWindowId() + " ");
+        statusString.append(getCommanExecutionTime() + " ");
+
     }
 
     /**
