@@ -13,7 +13,10 @@
 package org.testeditor.fixture.host.locators;
 
 import java.lang.reflect.Constructor;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.testeditor.fixture.host.s3270.Status;
+import org.testeditor.fixture.host.screen.Offset;
 
 /**
  * The Locator is a representation of a range on a Mainframe host screen.<br>
@@ -32,6 +35,33 @@ public class LocatorByWidth implements Locator {
     private int endColumn;
     private int maxColumn;
     private int maxRow;
+    private int offsetColumn;
+    private int offsetRow;
+    private int startColumnWithOffset;
+    private int startRowWithOffset;
+
+    /**
+     * @return the startColumnWithOffset
+     */
+    public int getStartColumnWithOffset() {
+        return startColumnWithOffset;
+    }
+
+    /**
+     * @return the startRowWithOffset
+     */
+    public int getStartRowWithOffset() {
+        return startRowWithOffset;
+    }
+
+    /**
+     * @return the endColumnWithOffset
+     */
+    public int getEndColumnWithOffset() {
+        return endColumnWithOffset;
+    }
+
+    private int endColumnWithOffset;
 
     /**
      * This is a {@link Constructor} for the representation of a
@@ -44,14 +74,27 @@ public class LocatorByWidth implements Locator {
      *            the start x position representation of a screen range.
      * @param width
      *            number of characters to be read.
+     * @param status
+     *            the status of the executed action
+     * @param offsetRow
+     *            The offset for the startpoint row in dependence on the zero
+     *            origin of the host screen.
+     * @param offsetColumn
+     *            The offset for the startpoint column in dependence on the zero
+     *            origin of the host screen.
      */
-    public LocatorByWidth(int startRow, int startColumn, int width, Status status) {
+    public LocatorByWidth(int startRow, int startColumn, int width, Status status, Offset offset) {
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
         this.startColumn = startColumn;
+        this.startColumnWithOffset = startColumn + offsetColumn;
         this.startRow = startRow;
-        this.endColumn = startColumn + width;
+        this.startRowWithOffset = startRow + offsetRow;
         this.width = width;
+        this.endColumn = startColumn + width;
+        this.endColumnWithOffset = startColumnWithOffset + width;
         checkBoundaries();
     }
 
@@ -66,11 +109,21 @@ public class LocatorByWidth implements Locator {
      *            A String in the form "2;5,34", where the first integer "2"
      *            represents the row, the second integer "5" represents the
      *            column and the third integer "34" represents the width..
+     * @param status
+     *            the status of the executed action
+     * @param offsetRow
+     *            The offset for the startpoint row in dependence on the zero
+     *            origin of the host screen.
+     * @param offsetColumn
+     *            The offset for the startpoint column in dependence on the zero
+     *            origin of the host screen.
      */
-    public LocatorByWidth(String elementLocator, Status status) {
+    public LocatorByWidth(String elementLocator, Status status, Offset offset) {
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
-        createLocatorByWidth(elementLocator);
+        this.offsetRow = offset.getOffsetRow();
+        this.offsetColumn = offset.getOffsetColumn();
+        initializeStartRowColumnAndWidth(elementLocator);
     }
 
     public int getStartColumn() {
@@ -89,6 +142,20 @@ public class LocatorByWidth implements Locator {
     }
 
     /**
+     * @return the offsetColumn
+     */
+    public int getOffsetColumn() {
+        return offsetColumn;
+    }
+
+    /**
+     * @return the offsetRow
+     */
+    public int getOffsetRow() {
+        return offsetRow;
+    }
+
+    /**
      * This method creates a Locator for the {@link LocatorStrategy} WIDTH
      * 
      * @param elementLocator
@@ -96,49 +163,39 @@ public class LocatorByWidth implements Locator {
      * @return {@link LocatorByWidth} filled with the following fields:
      *         startRow, startColumn, width (number of characters to be read).
      */
-    private LocatorByWidth createLocatorByWidth(String elementLocator) {
-        String[] splittedValues = elementLocator.split(";");
-        checkLocatorLength(elementLocator, splittedValues);
-        if (checkIfNumbers(splittedValues)) {
-            this.startRow = (Integer.parseInt(splittedValues[0]));
-            this.startColumn = (Integer.parseInt(splittedValues[1]));
-            this.width = (Integer.parseInt(splittedValues[2]));
-            this.endColumn = startColumn + width;
+    private void initializeStartRowColumnAndWidth(String elementLocator) {
+        Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+);(?<width>\\d+)");
+        Matcher matcher = locatorPattern.matcher(elementLocator);
+        if (matcher.matches()) {
+            this.startRow = Integer.parseInt(matcher.group("startRow"));
+            this.startColumn = Integer.parseInt(matcher.group("startColumn"));
+            this.startRowWithOffset = this.startRow + this.offsetRow;
+            this.startColumnWithOffset = this.startColumn + this.offsetColumn;
+            this.width = Integer.parseInt(matcher.group("width"));
+            this.endColumn = this.startColumn + this.width;
+            this.endColumnWithOffset = this.startColumnWithOffset + this.width;
             checkBoundaries();
         } else {
-            throw new RuntimeException("One of your locator arguments is not an integer value: startRow'"
-                    + splittedValues[0] + "' startColumn'" + splittedValues[1] + "' endRow'" + splittedValues[2]
-                    + "' endColumn'" + splittedValues[3] + "'");
-        }
-        return this;
-    }
-
-    private boolean checkIfNumbers(String[] splittedValues) {
-        return splittedValues[0].matches("\\d+") && splittedValues[1].matches("\\d+")
-                && splittedValues[2].matches("\\d+");
-    }
-
-    private void checkLocatorLength(String elementLocator, String[] splittedValues) {
-        if (splittedValues.length != 3) {
-            throw new RuntimeException("The number of arguments is '" + splittedValues.length
-                    + "' but should be 3 - locator: " + elementLocator + "'");
+            throw new IllegalArgumentException(
+                    "The provided locator did not match the expected pattern \"x;y;z\" where x, y and z are integer values. Got: "
+                            + elementLocator);
         }
     }
 
     @Override
     public void checkBoundaries() {
         // because we begin to count startColumn and startRow with 0
-        if (startColumn >= maxColumn) {
-            throw new RuntimeException("Your chosen column '" + startColumn + "' is greater than the maximum column '"
-                    + (maxColumn - 1) + "'");
+        if (startColumn > maxColumn) {
+            throw new IllegalArgumentException("Your chosen column '" + startColumn
+                    + "' is greater than the maximum column '" + (maxColumn - 1) + "'");
         }
-        if (startRow >= maxRow) {
-            throw new RuntimeException("Your chosen row width '" + startRow
-                    + "' is greater than the actual maximum row width '" + (maxRow - 1) + "'");
+        if (startRow > maxRow) {
+            throw new IllegalArgumentException("Your chosen row width '" + startRow
+                    + "' is greater than the actual maximum row width '" + maxRow + "'");
         }
-        if (endColumn >= maxColumn) {
-            throw new RuntimeException("Your chosen start column plus width '" + endColumn
-                    + "' is greater than the maximum column size'" + (maxColumn - 1) + "'");
+        if (endColumn > maxColumn) {
+            throw new IllegalArgumentException("Your chosen start column plus width '" + endColumn
+                    + "' is greater than the maximum column size'" + maxColumn + "'");
         }
     }
 

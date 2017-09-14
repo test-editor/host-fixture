@@ -12,19 +12,27 @@
  *******************************************************************************/
 package org.testeditor.fixture.host;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testeditor.fixture.host.s3270.options.CharacterSet.CHAR_GERMAN_EURO;
-import static org.testeditor.fixture.host.s3270.options.TerminalMode.MODE_24x80;
-import static org.testeditor.fixture.host.s3270.options.TerminalType.TYPE_3279;
-
-import org.testeditor.fixture.host.net.Connection;
+//import static org.mockito.Mockito.mock;
+//import static org.mockito.Mockito.verify;
+//import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.testeditor.fixture.host.net.Connection;
+import org.testeditor.fixture.host.screen.Offset;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ org.testeditor.fixture.host.HostDriverFixture.class,
+        org.testeditor.fixture.host.net.Connection.class })
+@PowerMockIgnore("javax.management.*")
 public class HostDriverFixtureTest {
 
     private static final String S3270_PATH = "S3270_PATH";
@@ -32,24 +40,30 @@ public class HostDriverFixtureTest {
     private static final int HOST_PORT = 1234;
     HostDriverFixture fixture;
     Connection con;
+    Offset offset = mock(Offset.class);;
+    private int offsetRow = 1;
+    private int offsetColumn = 1;
 
     @Before
     public void init() {
+        // fixture = mock(HostDriverFixture.class);
         con = mock(Connection.class);
         fixture = new HostDriverFixture(con);
+
     }
 
     @Test
     public void connectionSuccessfulTest() {
 
         // given
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any())).thenReturn(con);
         when(con.isConnected()).thenReturn(true);
 
         // when
-        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT);
+        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
 
         // then
-        verify(con).connect(S3270_PATH, HOST_URL, HOST_PORT, TYPE_3279, MODE_24x80, CHAR_GERMAN_EURO);
         Assert.assertTrue(connected);
     }
 
@@ -57,13 +71,14 @@ public class HostDriverFixtureTest {
     public void connectionUnsuccessfulTest() {
 
         // given
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any())).thenReturn(con);
         when(con.isConnected()).thenReturn(false);
 
         // when
-        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT);
+        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
 
         // then
-        verify(con).connect(S3270_PATH, HOST_URL, HOST_PORT, TYPE_3279, MODE_24x80, CHAR_GERMAN_EURO);
         Assert.assertFalse(connected);
     }
 
@@ -71,6 +86,9 @@ public class HostDriverFixtureTest {
     public void diconnectionSuccessfulTest() {
 
         // given
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any())).thenReturn(con);
+
         when(con.disconnect()).thenReturn(true);
 
         // when
@@ -84,11 +102,10 @@ public class HostDriverFixtureTest {
     public void diconnectionUnsuccessfulTest() {
 
         // given
-        Connection connection = new Connection();
-        HostDriverFixture hostDriverFixture = new HostDriverFixture(connection);
+        when(con.disconnect()).thenCallRealMethod();
 
         // when
-        boolean disconnected = hostDriverFixture.disconnect();
+        boolean disconnected = fixture.disconnect();
 
         // then
         Assert.assertTrue(disconnected);
