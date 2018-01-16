@@ -12,9 +12,11 @@
  *******************************************************************************/
 package org.testeditor.fixture.host;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.FileUtils;
 import org.slf4j.Logger;
@@ -44,6 +46,7 @@ import org.testeditor.fixture.host.screen.Field;
 import org.testeditor.fixture.host.screen.Offset;
 import org.testeditor.fixture.host.screen.TerminalScreen;
 import org.testeditor.fixture.host.util.LineReader;
+import org.testeditor.fixture.host.util.Timer;
 
 /**
  * HostDriverFixture provides convenience methods for automating mainframe
@@ -55,6 +58,11 @@ import org.testeditor.fixture.host.util.LineReader;
  */
 public class HostDriverFixture implements TestRunListener, TestRunReportable {
 
+    private static final int THREAD_SLEEP_IN_MILLIS = 100;
+
+    // Maximum amount of time x 100 ms -> 100 x 100ms = 10.000ms = 10 Seconds
+    private static final int MAX_TIME_TO_WAIT = 100;
+
     private static final Logger logger = LoggerFactory.getLogger(HostDriverFixture.class);
 
     private Connection connection;
@@ -65,6 +73,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     private String runningTest = null;
     private Offset offset;
     private Command commandAscii = new Command("Ascii", "Ascii");
+    private Timer timer = new Timer(TimeUnit.MILLISECONDS);
 
     public HostDriverFixture() {
         this.connection = new Connection();
@@ -103,13 +112,34 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         this.offset = new Offset(-offsetRow, -offsetColumn);
         TerminalType type = TerminalType.TYPE_3279;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
+        timer.startTimer();
         connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
         if (connection.isConnected()) {
+            waitUntilScreenIsFormatted(MAX_TIME_TO_WAIT);
+            timer.stopTimer();
+            logger.debug("Elapsed time in millis after connect: {}", timer.getElapsedTime());
             logger.info("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
         } else {
             logger.info("The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
             return false;
+        }
+    }
+
+    @VisibleForTesting
+    void waitUntilScreenIsFormatted(int maxTimeToWait) {
+        Status status = connection.getStatus();
+        ScreenFormatting screenFormatting = status.getScreenFormatting();
+        logger.debug("Screenformatting : {}", screenFormatting.getFormatting());
+        Integer i = 0;
+        while (status.getScreenFormatting() != ScreenFormatting.FORMATTED && i++ < maxTimeToWait) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(THREAD_SLEEP_IN_MILLIS);
+            } catch (InterruptedException e) {
+                logger.error("Something went wrong during wait period: {}", e.getMessage());
+            }
+            logger.debug("waited {} ms", THREAD_SLEEP_IN_MILLIS);
+            status = connection.getStatus();
         }
     }
 
