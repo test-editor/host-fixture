@@ -27,11 +27,11 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.testeditor.fixture.host.net.Connection;
+import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.screen.Offset;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ org.testeditor.fixture.host.HostDriverFixture.class,
-        org.testeditor.fixture.host.net.Connection.class })
+@PrepareForTest({ org.testeditor.fixture.host.HostDriverFixture.class, org.testeditor.fixture.host.net.Connection.class })
 @PowerMockIgnore("javax.management.*")
 public class HostDriverFixtureTest {
 
@@ -56,11 +56,15 @@ public class HostDriverFixtureTest {
     public void connectionSuccessfulTest() {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(),
-                Mockito.any(), Mockito.any())).thenReturn(con);
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(con);
         when(con.isConnected()).thenReturn(true);
 
         // when
+        String defaultStatusString = "U U U C(abcdefg.hi.google-mainframe.com) I 2 24 80 6 44 0x0 -";
+        Offset offset = new Offset(1, 1);
+        Status status = new Status(defaultStatusString, offset);
+        when(con.getStatus()).thenReturn(status);
         boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
 
         // then
@@ -71,8 +75,8 @@ public class HostDriverFixtureTest {
     public void connectionUnsuccessfulTest() {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(),
-                Mockito.any(), Mockito.any())).thenReturn(con);
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(con);
         when(con.isConnected()).thenReturn(false);
 
         // when
@@ -86,8 +90,8 @@ public class HostDriverFixtureTest {
     public void diconnectionSuccessfulTest() {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(),
-                Mockito.any(), Mockito.any())).thenReturn(con);
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(con);
 
         when(con.disconnect()).thenReturn(true);
 
@@ -109,6 +113,20 @@ public class HostDriverFixtureTest {
 
         // then
         Assert.assertTrue(disconnected);
+    }
+
+    @Test
+    public void waitUntilScreenIsFormattedTest() {
+
+        // given
+        String defaultStatusString = "U U U C(abcdefg.hi.google-mainframe.com) I 2 24 80 6 44 0x0 -";
+        Offset offset = new Offset(1, 1);
+        Status status = new Status(defaultStatusString, offset);
+        when(con.getStatus()).thenReturn(status);
+
+        // when
+        fixture.waitUntilScreenIsFormatted(20);
+
     }
 
 }
