@@ -4,16 +4,9 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.4'
     id 'net.researchgate.release' version '2.7.0'
     id 'eclipse'
-    id 'org.testeditor.gradle-plugin' version '0.8'
 }
 
 description = """Testing framework for mainframe applications using X3270 / S3270 for automating the input on a IBM 3270 terminal emulator for the X Window System and Windows see http://x3270.bgp.nu/"""
-
-// Configure the testeditor plugin
-testeditor {
-    version '1.17.1'
-    xtextVersion '2.13.0'
-}
 
 repositories {
     jcenter()

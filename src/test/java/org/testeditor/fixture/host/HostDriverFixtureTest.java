@@ -12,11 +12,7 @@
  *******************************************************************************/
 package org.testeditor.fixture.host;
 
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.when;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
