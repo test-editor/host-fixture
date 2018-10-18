@@ -1,13 +1,26 @@
 plugins {
     id 'maven'
     id 'java'
-    id 'com.jfrog.bintray' version '1.7.3'
-    id 'net.researchgate.release' version '2.6.0'
-    id 'org.xtext.xtend' version '1.0.17'
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'net.researchgate.release' version '2.7.0'
+    id 'eclipse'
+    id 'org.testeditor.gradle-plugin' version '0.8'
+}
+
+description = """Testing framework for mainframe applications using X3270 / S3270 for automating the input on a IBM 3270 terminal emulator for the X Window System and Windows see http://x3270.bgp.nu/"""
+
+// Configure the testeditor plugin
+testeditor {
+    version '1.17.1'
+    xtextVersion '2.13.0'
 }
 
 repositories {
     jcenter()
+    mavenCentral() // This is very important for JUnit 5 tests to execute see https://www.petrikainulainen.net/programming/testing/junit-5-tutorial-running-unit-tests-with-gradle/
+    maven { url "http://dl.bintray.com/test-editor/Fixtures/" }
+    maven { url "http://dl.bintray.com/test-editor/maven/" }
+    
 }
 
 group = 'org.testeditor.fixture.host'
@@ -39,7 +52,6 @@ dependencies {
 sourceSets.main.resources.srcDirs = [ "src/main/java" ]
 sourceSets.main.resources.includes = [ "**/*.aml" ]    
  
-// TODO code below copied from core-fixture
 jar {
     manifest {
         attributes 'Implementation-Title': "${project.group}.${project.name}",
@@ -73,7 +85,7 @@ bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
     configurations = ['archives']
-    publish = true 
+    publish = true
     pkg {
         repo = 'Fixtures'
         name = project.name

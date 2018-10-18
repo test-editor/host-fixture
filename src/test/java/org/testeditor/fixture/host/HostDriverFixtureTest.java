@@ -13,8 +13,10 @@
 package org.testeditor.fixture.host;
 
 //import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.verify;
 //import static org.mockito.Mockito.when;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -40,7 +42,7 @@ public class HostDriverFixtureTest {
     private static final int HOST_PORT = 1234;
     HostDriverFixture fixture;
     Connection con;
-    Offset offset = mock(Offset.class);;
+    Offset offset = mock(Offset.class);
     private int offsetRow = 1;
     private int offsetColumn = 1;
 
@@ -113,20 +115,6 @@ public class HostDriverFixtureTest {
 
         // then
         Assert.assertTrue(disconnected);
-    }
-
-    @Test
-    public void waitUntilScreenIsFormattedTest() {
-
-        // given
-        String defaultStatusString = "U U U C(abcdefg.hi.google-mainframe.com) I 2 24 80 6 44 0x0 -";
-        Offset offset = new Offset(1, 1);
-        Status status = new Status(defaultStatusString, offset);
-        when(con.getStatus()).thenReturn(status);
-
-        // when
-        fixture.waitUntilScreenIsFormatted(20);
-
     }
 
 }

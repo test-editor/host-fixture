@@ -25,11 +25,11 @@ import org.junit.Test;
 public class TimerTest {
 
     @Test
-    public void testTimerMillis() {
+    public void testTimerMillis() throws InterruptedException {
 
         // given
-        long low = 998;
-        long high = 1002;
+        final long low = 998;
+        final long high = 1002;
         final int TIME_TO_WAIT = 1000001;
         TimeUnit timeUnit = TimeUnit.MILLISECONDS;
         Timer timer = new Timer(timeUnit);
@@ -39,14 +39,13 @@ public class TimerTest {
         methodToBeTimed(TIME_TO_WAIT, TimeUnit.MICROSECONDS);
         timer.stopTimer();
         long elapsedTime = timer.getElapsedTime();
-        System.out.println(elapsedTime);
 
         // then
         Assert.assertThat(elapsedTime, allOf(greaterThan(low), lessThan(high)));
     }
 
     @Test
-    public void testTimerSeconds() {
+    public void testTimerSeconds() throws InterruptedException {
 
         // given
         final long ELAPSED_TIME = 1;
@@ -65,7 +64,7 @@ public class TimerTest {
     }
 
     @Test
-    public void testTimerMicroSeconds() {
+    public void testTimerMicroSeconds() throws InterruptedException {
 
         // given
         final long ELAPSED_TIME = 1;
@@ -86,7 +85,7 @@ public class TimerTest {
     }
 
     @Test
-    public void testTwoTimerStarts() {
+    public void testTwoTimerStarts() throws InterruptedException {
 
         // given
         final long ELAPSED_TIME = 1;
@@ -111,13 +110,8 @@ public class TimerTest {
         Assert.assertEquals(ELAPSED_TIME, elapsedTime2);
     }
 
-    private void methodToBeTimed(int i, TimeUnit timeUnit) {
-        try {
-            timeUnit.sleep(i);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    private void methodToBeTimed(int i, TimeUnit timeUnit) throws InterruptedException {
+        timeUnit.sleep(i);
     }
 
 }

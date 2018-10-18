@@ -38,6 +38,9 @@ public class Timer {
     }
 
     public void stopTimer() {
+        if (sw == null) {
+            throw new RuntimeException("Timer not started yet");
+        }
         elapsedTime = sw.elapsed(timeUnit);
     }
 

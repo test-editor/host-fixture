@@ -127,20 +127,24 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     }
 
     @VisibleForTesting
-    void waitUntilScreenIsFormatted(int maxTimeToWait) {
+    void waitUntilScreenIsFormatted(int maxIterationThreadSleeping) {
         Status status = connection.getStatus();
         ScreenFormatting screenFormatting = status.getScreenFormatting();
         logger.debug("Screenformatting : {}", screenFormatting.getFormatting());
         Integer i = 0;
-        while (status.getScreenFormatting() != ScreenFormatting.FORMATTED && i++ < maxTimeToWait) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(THREAD_SLEEP_IN_MILLIS);
-            } catch (InterruptedException e) {
-                logger.error("Something went wrong during wait period: {}", e.getMessage());
-            }
-            logger.debug("waited {} ms", THREAD_SLEEP_IN_MILLIS);
-            status = connection.getStatus();
+        while (status.getScreenFormatting() != ScreenFormatting.FORMATTED && i++ < maxIterationThreadSleeping) {
+            performWaits(status);
         }
+    }
+    
+    protected void performWaits(Status status) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(THREAD_SLEEP_IN_MILLIS);
+        } catch (InterruptedException e) {
+            logger.error("Something went wrong during wait period: {}", e.getMessage());
+        }
+        logger.debug("waited {} ms", THREAD_SLEEP_IN_MILLIS);
+        status = connection.getStatus();
     }
 
     /**
