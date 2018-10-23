@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.HostDriverFixture;
 import org.testeditor.fixture.host.locators.LocatorStrategy;
 import org.testeditor.fixture.host.s3270.Status;
@@ -47,7 +48,7 @@ public class HostDriverIntegrationTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void intialize() {
+    public void intialize() throws FixtureException {
         // manual execution only in special environments
         assumeWindowsAndS3270Accessible();
         standardRow = Integer.parseInt(System.getenv("STANDARD_ROW"));
@@ -73,7 +74,7 @@ public class HostDriverIntegrationTest {
      * annotation @Test to test this special environment. Please do not delete
      * this file.
      */
-    public void connectionTest() {
+    public void connectionTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -90,7 +91,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void statusTest() {
+    public void statusTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -112,7 +113,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void screenTest() {
+    public void screenTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -124,7 +125,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtLocaterStrategyStartTest() {
+    public void typeAtLocaterStrategyStartTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -141,7 +142,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtLocaterStrategyStartStopTest() {
+    public void typeAtLocaterStrategyStartStopTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -159,7 +160,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void readAtLocatorStrategyWidth() {
+    public void readAtLocatorStrategyWidth() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -175,7 +176,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtTestFailure() {
+    public void typeAtTestFailure() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -189,7 +190,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void newTransactionTest() {
+    public void newTransactionTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -229,7 +230,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void readValueWithLocatorStrategyStartStopTest() {
+    public void readValueWithLocatorStrategyStartStopTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -258,7 +259,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void readValueWithLocatorStrategyWidthTest() {
+    public void readValueWithLocatorStrategyWidthTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -287,7 +288,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtLocatorStrategyWidthTest() {
+    public void typeAtLocatorStrategyWidthTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -318,7 +319,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtLocatorStrategyStartStopTest() {
+    public void typeAtLocatorStrategyStartStopTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init

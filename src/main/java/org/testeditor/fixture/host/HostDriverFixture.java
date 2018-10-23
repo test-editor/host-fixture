@@ -16,11 +16,13 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.core.TestRunListener;
 import org.testeditor.fixture.core.TestRunReportable;
 import org.testeditor.fixture.core.TestRunReporter;
@@ -107,7 +109,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            for the column.
      */
     @FixtureMethod
-    public boolean connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) {
+    public boolean connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) throws FixtureException {
         logger.info("Host-Fixture connecting ...");
         this.offset = new Offset(-offsetRow, -offsetColumn);
         TerminalType type = TerminalType.TYPE_3279;
@@ -153,7 +155,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *
      */
     @FixtureMethod
-    public boolean disconnect() {
+    public boolean disconnect() throws FixtureException {
         logger.info("Disconnecting ...");
         return connection.disconnect();
     }
@@ -165,33 +167,9 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @return {@link org.testeditor.fixture.host.s3270.Status}
      */
     @FixtureMethod
-    public Status getStatus() {
+    public Status getStatus() throws FixtureException {
         logger.info("get Status ...");
         return connection.getStatus();
-    }
-
-    /**
-     * Provides a possibility to type a value into a specified field through the
-     * parameters row and column.
-     * <p>
-     * Attention! The input field has to be unprotected and not hidden. If they
-     * are, the s3270 emulation will lock further actions.
-     *
-     * @param value
-     *            the value to be typed into the input field of a mainframe
-     *            window.
-     * @param row
-     *            the row of the input field
-     * @param col
-     *            the column of the input field.
-     */
-    private void typeAtPosition(String value, int row, int col) {
-        setCursorPosition(row, col);
-        waiting(100);
-        Command commandType = new Command("String", "String(\"" + value + "\")");
-        connection.doCommand("String(\"" + value + "\")", commandType);
-        connection.doCommand("ascii", commandAscii); // just to see if typed in
-                                                     // successfully.
     }
 
     /**
@@ -209,7 +187,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            elementLocator
      */
     @FixtureMethod
-    public void typeAt(String elementLocator, LocatorStrategy locatorType, String value) {
+    public void typeAt(String elementLocator, LocatorStrategy locatorType, String value) throws FixtureException {
         Result result = moveCursor(elementLocator, locatorType);
         result.logStatus();
         Status status = result.getStatus();
@@ -238,7 +216,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @see ControlCommand
      */
     @FixtureMethod
-    public void sendCommand(ControlCommand command) {
+    public void sendCommand(ControlCommand command) throws FixtureException {
         waiting(100);
         Command commandString = new Command(command.getCommand(), command.getCommand());
         connection.doCommand(command.getCommand(), commandString);
@@ -259,11 +237,11 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @return the String value which is read at the given position.
      */
     @FixtureMethod
-    public String readValueAt(String elementLocator, LocatorStrategy locatorType) {
+    public String readValueAt(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
         return getElement(elementLocator, locatorType);
     }
 
-    protected String getElement(String elementLocator, LocatorStrategy locatorType) {
+    protected String getElement(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
         logger.info("Lookup element {} type {}", elementLocator, locatorType.name());
         String result = null;
         Status status = getStatus();
@@ -343,7 +321,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @return {@link Result} of the action.
      */
     @FixtureMethod
-    public Result moveCursor(String elementLocator, LocatorStrategy locatorType) {
+    public Result moveCursor(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
         Result result = null;
         Status status = getStatus();
         switch (locatorType) {
@@ -389,7 +367,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *         ScreenBuffer.
      */
     @FixtureMethod
-    public String buildAllFieldsAsString() {
+    public String buildAllFieldsAsString() throws FixtureException {
         String allFieldAsString = null;
         Command command = new Command("ReadBuffer", "ReadBuffer(Ascii)");
         Result result = connection.doCommand("ReadBuffer(Ascii)", command);
@@ -448,19 +426,38 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         return runningTest != null ? runningTest : "UNKNOWN_TEST";
     }
 
-    @Override
-    public void reported(SemanticUnit unit, Action action, String msg) {
-        if (unit == SemanticUnit.TEST && action == Action.ENTER) {
-            runningTest = msg;
-        }
-        if (screenshotShouldBeMade(unit, action, msg)) {
-            takeScreenshot(msg + '.' + action.name());
-        }
-    }
-
     private boolean screenshotShouldBeMade(SemanticUnit unit, Action action, String msg) {
         // configurable through maven build?
         return ((action == Action.LEAVE) || unit == SemanticUnit.TEST) && connection.isConnected();
     }
+
+	@Override
+	public void reported(SemanticUnit unit, Action action, String message, String id,
+			org.testeditor.fixture.core.TestRunReporter.Status status, Map<String, String> variables) {
+        if (unit == SemanticUnit.TEST && action == Action.ENTER) {
+            runningTest = message;
+        }
+        if (screenshotShouldBeMade(unit, action, message)) {
+            takeScreenshot(message + '.' + action.name());
+        }
+	}
+
+	@Override
+	public void reportFixtureExit(FixtureException fixtureException) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reportExceptionExit(Exception exception) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reportAssertionExit(AssertionError assertionError) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
