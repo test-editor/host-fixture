@@ -12,25 +12,18 @@
  *******************************************************************************/
 package org.testeditor.fixture.host;
 
-
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.screen.Offset;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ org.testeditor.fixture.host.HostDriverFixture.class, org.testeditor.fixture.host.net.Connection.class })
-@PowerMockIgnore("javax.management.*")
 public class HostDriverFixtureTest {
 
     private static final String S3270_PATH = "S3270_PATH";
@@ -51,7 +44,7 @@ public class HostDriverFixtureTest {
     }
 
     @Test
-    public void connectionSuccessfulTest() {
+    public void connectionSuccessfulTest() throws FixtureException {
 
         // given
         when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -70,7 +63,7 @@ public class HostDriverFixtureTest {
     }
 
     @Test
-    public void connectionUnsuccessfulTest() {
+    public void connectionUnsuccessfulTest() throws FixtureException {
 
         // given
         when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -85,7 +78,7 @@ public class HostDriverFixtureTest {
     }
 
     @Test
-    public void diconnectionSuccessfulTest() {
+    public void diconnectionSuccessfulTest() throws FixtureException {
 
         // given
         when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -101,7 +94,7 @@ public class HostDriverFixtureTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void diconnectionUnsuccessfulTest() {
+    public void diconnectionUnsuccessfulTest() throws FixtureException {
 
         // given
         when(con.disconnect()).thenCallRealMethod();

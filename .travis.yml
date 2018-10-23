@@ -1,11 +1,18 @@
-language: java
+language: nix
 sudo: false
-jdk:
-  - oraclejdk8
 cache:
   directories:
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
+  - "$HOME/nix.store"
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+before_install:
+- sudo mkdir -p /etc/nix
+- echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+- echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
+before_cache:
+- mkdir -p $HOME/nix.store
+- nix copy --to file://$HOME/nix.store -f default.nix buildInputs
+
 env:
   global:
   - # Environment variables for BINTRAY Deployment
@@ -14,9 +21,9 @@ env:
   - # Environment variables for GITHUB
   - secure: "Rh/qjFwpWovV+qYu/YPj0sVrSRoNNq9zN3wF/t4yAsW9Y0NqE5GXRelCwPZk4nFpCNkGTF7ucSvBtERkAWhmjbtULfDdsJ3sNHl7YsZyw30GXBA0WTsIP5q1JnUWdEhgpSWcUbc8Q5740cNfHYpfG/eosTBLkuGBhpOe1oyis4FWM+HhbHajzO7m+p6NtnNp9Oyp/pXpxaBc0oJI2AruQLztc21yblL2MFJOOqqwmaWLjY/4DY07Bnc3oTvRP5eqy7IAXv5VIYlaePChS8Wit5bZngZosfLae9+cn39jYBO+tZeCOgHlEltX+YYsgzJBL0jAAzdRX3s/c1ouqoGPwQdvsOaWBiv/oww6cR9CJmpk8riYyU9QXiXb0hZI9eOkkEMlCqTFoAqJahp8qxenpImYTMfBITxV2cLdvq8riwgp+AzpEouGHK0vHtAo0EEvqYCRG9PFUvAhOeeiMtTY4QE0U4HaiaCeXNwUF7EPbNfLg8bCGsfHIozh8BJ0gJfnvaY2aKmqA1r0UHO/PNHpYmS0zrhOk+KWvC/qPS5HDJ2dadBMc+SX2Nxf3V+/MwtzJfRiVxtnSAwTQvWvbXpul4kIiaGWQGiwUJJK9Wxc5B05hehXkuIgOo0c+hefX0A1TyeyBwLZUvPUtFlg373ZR3B5pJVfMqvQwSt25St38S8="
   - secure: "oOp083Ofp5Ljsi+psOvL1SoiguV2TEimFnVV6B2EpPik0KNKmds/GxlkttgSZlVRjAnVKL48+i7/qN8JqT04MItAvS3gdccvqUNodVDl3VmqhHWOUW1Xx08c3W4BXLmfAeyeIt15+bYKP5Fv7PVEeHnAtQ/4xKL7jee6ZyMG1OZEAQjbL8QwLWzAq07oUGvNwG3bA17RNzodmcneLTok/NLNdFPMOV2mDhdhb+iXoTAYQvnq00zYDoQQLNf3sDREGZdXnBAGtwI9fplhqkmVut0qSpaz0ZRQDGnc4Z004lgelC5SmbJ8CeCWWtd7rFPqvBQNBmXkuu5B4SMdqVWZd5gC4099WKNLz9WZERcZ3vyOK2Ueqi/WWD0HYnBCzVhs4l7YoeBAAjObQJ0izGNgVMHk8pAUox4EZLpx+2TNo9vIuOdIN+eI25YKmEb+r+3e17iaRLh3ns/pZ7z1BaXyUKH1rhKWW/uLBD/sZOE1zjubPhkRYxdjSTob8gNwQOs7HcXpIFNaK/33lMsYDRaH6/fxwkoRpRQnWcJyRP8n9JqlXlF7toTH9LnWfxNkKGZjhwhs7mjQVpf3pFO7IWp/AjNCHd/0cwNUVwJdOjyYemtj3mdbw7dNrvevoHzbuTy7R7JOygbLYFQzxEiiymO+jJMyZz8apr9YaEpToHQVi1g="
-  matrix:
-    - FIREFOX_VERSION="latest"  
 
+script:
+  - nix-shell --command "./gradlew assemble check install"
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - ./.travis-publishOnRelease.sh
+  - nix-shell --command "./.travis-publishOnRelease.sh"
