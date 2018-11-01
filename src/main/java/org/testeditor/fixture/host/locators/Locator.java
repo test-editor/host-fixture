@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.testeditor.fixture.host.locators;
 
+import org.testeditor.fixture.core.FixtureException;
+
 /**
  * The Locator is a representation of a range on a Mainframe host screen.<br>
  * This could be represented through a declaration of a start and an end point.
@@ -20,6 +22,6 @@ package org.testeditor.fixture.host.locators;
  */
 public interface Locator {
 
-    public void checkBoundaries();
+    public void checkBoundaries() throws FixtureException;
 
 }

@@ -13,6 +13,8 @@
 package org.testeditor.fixture.host.util;
 
 import java.util.List;
+
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.locators.Locator;
 import org.testeditor.fixture.host.locators.LocatorByStartStop;
 import org.testeditor.fixture.host.locators.LocatorByWidth;
@@ -38,8 +40,9 @@ public class LineReader {
      *            see {@link Locator} the start and endpoint representation of
      *            String to be read.
      * @return the excerpted String from start to endpoint
+     * @throws FixtureException 
      */
-    public String readMultilines(List<String> lines, LocatorByStartStop locator) {
+    public String readMultilines(List<String> lines, LocatorByStartStop locator) throws FixtureException {
         StringBuffer sb = new StringBuffer();
 
         int startRow = locator.getStartRowWithOffset();
@@ -66,8 +69,9 @@ public class LineReader {
      *            see {@link Locator} the start and endpoint representation of
      *            String to be read.
      * @return the excerpted String from start to endpoint.
+     * @throws FixtureException 
      */
-    public String readSingleLine(String line, LocatorByStartStop locator) {
+    public String readSingleLine(String line, LocatorByStartStop locator) throws FixtureException {
         // because String.subString begins at 0
         int offsetForSubstring = 1;
         int startColumn = locator.getStartColumnWithOffset();
@@ -91,8 +95,9 @@ public class LineReader {
      *            origin of the host screen.
      * 
      * @return the excerpted String from start to endpoint.
+     * @throws FixtureException 
      */
-    public String readSingleLineWidth(String line, LocatorByWidth locator) {
+    public String readSingleLineWidth(String line, LocatorByWidth locator) throws FixtureException {
         String result = null;
         int startColumn = locator.getStartColumnWithOffset();
         locator.checkBoundaries();
@@ -101,12 +106,12 @@ public class LineReader {
             try {
                 result = lineReplaced.substring(startColumn, startColumn + locator.getWidth());
             } catch (StringIndexOutOfBoundsException e) {
-                throw new RuntimeException(
+                throw new FixtureException(
                         "Your chosen argument start column '" + startColumn + "' plus width '" + locator.getWidth()
                                 + "' is greater than the maximum column width: '" + lineReplaced.length() + "'");
             }
         } else {
-            throw new RuntimeException("Your chosen argument width '" + locator.getWidth()
+            throw new FixtureException("Your chosen argument width '" + locator.getWidth()
                     + "' is greater than the actual max column width '" + lineReplaced.length() + "'");
         }
 

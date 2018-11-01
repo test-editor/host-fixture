@@ -78,7 +78,7 @@ public class HostDriverFixtureTest {
     }
 
     @Test
-    public void diconnectionSuccessfulTest() throws FixtureException {
+    public void disconnectionSuccessfulTest() throws FixtureException {
 
         // given
         when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -94,7 +94,7 @@ public class HostDriverFixtureTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void diconnectionUnsuccessfulTest() throws FixtureException {
+    public void disconnectionUnsuccessfulTest() throws FixtureException {
 
         // given
         when(con.disconnect()).thenCallRealMethod();

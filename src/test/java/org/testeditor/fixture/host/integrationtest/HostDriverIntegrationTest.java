@@ -62,6 +62,7 @@ public class HostDriverIntegrationTest {
 
     private void assumeWindowsAndS3270Accessible() {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
+        // This path is to be set when tests are executed under Windows with e.g. following S3270_PATH=c:\dev\tools\wc3270\ws3270.exe
         s3270Path = System.getenv("S3270_PATH");
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
                 S3270Helper.isS3270DriverPresent(s3270Path));

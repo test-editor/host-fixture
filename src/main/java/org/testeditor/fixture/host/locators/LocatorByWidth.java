@@ -15,6 +15,8 @@ package org.testeditor.fixture.host.locators;
 import java.lang.reflect.Constructor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.screen.Offset;
 
@@ -82,8 +84,9 @@ public class LocatorByWidth implements Locator {
      * @param offsetColumn
      *            The offset for the startpoint column in dependence on the zero
      *            origin of the host screen.
+     * @throws FixtureException 
      */
-    public LocatorByWidth(int startRow, int startColumn, int width, Status status, Offset offset) {
+    public LocatorByWidth(int startRow, int startColumn, int width, Status status, Offset offset) throws FixtureException {
         this.offsetRow = offset.getOffsetRow();
         this.offsetColumn = offset.getOffsetColumn();
         this.maxRow = status.getNumberRows();
@@ -117,8 +120,9 @@ public class LocatorByWidth implements Locator {
      * @param offsetColumn
      *            The offset for the startpoint column in dependence on the zero
      *            origin of the host screen.
+     * @throws FixtureException 
      */
-    public LocatorByWidth(String elementLocator, Status status, Offset offset) {
+    public LocatorByWidth(String elementLocator, Status status, Offset offset) throws FixtureException {
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
         this.offsetRow = offset.getOffsetRow();
@@ -162,8 +166,9 @@ public class LocatorByWidth implements Locator {
      *            in the form "1;2;45"
      * @return {@link LocatorByWidth} filled with the following fields:
      *         startRow, startColumn, width (number of characters to be read).
+     * @throws FixtureException 
      */
-    private void initializeStartRowColumnAndWidth(String elementLocator) {
+    private void initializeStartRowColumnAndWidth(String elementLocator) throws FixtureException {
         Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+);(?<width>\\d+)");
         Matcher matcher = locatorPattern.matcher(elementLocator);
         if (matcher.matches()) {
@@ -176,25 +181,25 @@ public class LocatorByWidth implements Locator {
             this.endColumnWithOffset = this.startColumnWithOffset + this.width;
             checkBoundaries();
         } else {
-            throw new IllegalArgumentException(
+            throw new FixtureException(
                     "The provided locator did not match the expected pattern \"x;y;z\" where x, y and z are integer values. Got: "
                             + elementLocator);
         }
     }
 
     @Override
-    public void checkBoundaries() {
+    public void checkBoundaries() throws FixtureException {
         // because we begin to count startColumn and startRow with 0
         if (startColumn > maxColumn) {
-            throw new IllegalArgumentException("Your chosen column '" + startColumn
+            throw new FixtureException("Your chosen column '" + startColumn
                     + "' is greater than the maximum column '" + (maxColumn - 1) + "'");
         }
         if (startRow > maxRow) {
-            throw new IllegalArgumentException("Your chosen row width '" + startRow
+            throw new FixtureException("Your chosen row width '" + startRow
                     + "' is greater than the actual maximum row width '" + maxRow + "'");
         }
         if (endColumn > maxColumn) {
-            throw new IllegalArgumentException("Your chosen start column plus width '" + endColumn
+            throw new FixtureException("Your chosen start column plus width '" + endColumn
                     + "' is greater than the maximum column size'" + maxColumn + "'");
         }
     }

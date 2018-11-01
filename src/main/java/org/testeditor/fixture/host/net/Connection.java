@@ -97,7 +97,7 @@ public class Connection {
         String commandLine = String.format("%s -charset %s -model %s-%d %s:%d -utf8", s3270Path, charSet.getCharSet(),
                 type.getType(), mode.getMode(), hostname, port);
         try {
-            logger.debug("executing " + commandLine);
+            logger.trace("executing " + commandLine);
             s3270Process = Runtime.getRuntime().exec(commandLine);
 
             out = new PrintWriter(new OutputStreamWriter(s3270Process.getOutputStream()));
@@ -133,9 +133,9 @@ public class Connection {
         cleanup();
         boolean success = !isConnected();
         if (success) {
-            logger.info("Disconnected successfully from host : {} ", hostname);
+            logger.trace("Disconnected successfully from host : {} ", hostname);
         } else {
-            logger.info("Discoonection failed");
+            logger.error("Disconnection failed");
         }
         return success;
     }
@@ -209,11 +209,11 @@ public class Connection {
         try {
             out.println(commandString);
             out.flush();
-            logger.debug(
+            logger.trace(
                     "************************************************************************************************");
-            logger.debug("---> Command sent: '{}'", command.getActionForLog());
+            logger.trace("---> Command sent: '{}'", command.getActionForLog());
             if (commandString.equals("ascii")) {
-                logger.debug(
+                logger.trace(
                         "--------------0----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8");
             }
             List<String> lines = readOutput();
@@ -221,7 +221,7 @@ public class Connection {
             if (size > 1) {
                 Result result = new Result(lines.subList(0, size - 2), lines.get(size - 2), lines.get(size - 1),
                         offset);
-                logger.debug(
+                logger.trace(
                         "************************************************************************************************");
                 return result;
             } else {

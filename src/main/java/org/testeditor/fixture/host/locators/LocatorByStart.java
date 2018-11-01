@@ -1,5 +1,4 @@
 /*******************************************************************************
- * Copyright (c) 2012 - 2018 Signal Iduna Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +14,10 @@ package org.testeditor.fixture.host.locators;
 import java.lang.reflect.Constructor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.screen.Offset;
 
@@ -38,11 +41,12 @@ public class LocatorByStart implements Locator {
     private int maxColumn;
     private int offsetColumn;
     private int offsetRow;
+    
+    private static final Logger logger = LoggerFactory.getLogger(LocatorByStart.class);
 
     /**
      * This is a {@link Constructor} for the representation of a
-     * {@link LocatorStrategy} START_STOP. That means we have a start(x,y) and
-     * an end(x,y) position.
+     * {@link LocatorStrategy} START. That means we have only a start(x,y) position.
      * 
      * @param startRow
      *            the start y position representation of a screen range
@@ -50,14 +54,12 @@ public class LocatorByStart implements Locator {
      *            the start x position representation of a screen range
      * @param status
      *            the status of the executed action
-     * @param offsetRow
-     *            The offset for the startpoint row in dependence on the zero
+     * @param offset
+     *            The offset for the startpoint row and column in dependent on the zero
      *            origin of the host screen.
-     * @param offsetColumn
-     *            The offset for the startpoint column in dependence on the zero
-     *            origin of the host screen.
+     * @throws FixtureException 
      */
-    public LocatorByStart(int startRow, int startColumn, Status status, Offset offset) {
+    public LocatorByStart(int startRow, int startColumn, Status status, Offset offset) throws FixtureException {
         this.offsetRow = offset.getOffsetRow();
         this.offsetColumn = offset.getOffsetColumn();
         this.startRow = startRow;
@@ -67,6 +69,10 @@ public class LocatorByStart implements Locator {
         this.maxRow = status.getCurrentCursorRow();
         this.maxColumn = status.getNumberColumns();
         checkBoundaries();
+        logger.trace("LocatorByStart: X-Position = {} ; Y-Position = {} ; "
+                                   + "X-Position with offset = {} ; Y-Position with offset = {} ; "
+                                   + "current X-Position = {} ; current Y-Position = {}", 
+                                   startColumn, startRow, startColumnWithOffset, startRowWithOffset, maxColumn, maxRow); 
     }
 
     /**
@@ -85,19 +91,22 @@ public class LocatorByStart implements Locator {
      *            The start position representation of a mainframe host screen.
      * @param status
      *            the status of the executed action
-     * @param offsetRow
-     *            The offset for the startpoint row in dependence on the zero
+     * @param offset
+     *            The offset for the startpoint row and column in dependent on the zero
      *            origin of the host screen.
-     * @param offsetColumn
-     *            The offset for the startpoint column in dependence on the zero
-     *            origin of the host screen.
+     * @throws FixtureException 
      */
-    public LocatorByStart(String elementLocator, Status status, Offset offset) {
+    public LocatorByStart(String elementLocator, Status status, Offset offset) throws FixtureException {
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
         this.offsetRow = offset.getOffsetRow();
         this.offsetColumn = offset.getOffsetColumn();
         initializeStartRowAndColumn(elementLocator);
+        logger.trace("LocatorByStart: X-Position = {} ; Y-Position = {} ; "
+                + "X-Position with offset = {} ; Y-Position with offset = {} ; "
+                + "current X-Position = {} ; current Y-Position = {}", 
+                startColumn, startRow, startColumnWithOffset, startRowWithOffset, maxColumn, maxRow); 
+
     }
 
     /**
@@ -115,14 +124,13 @@ public class LocatorByStart implements Locator {
     }
 
     /**
-     * This method creates a Locator for the {@link LocatorStrategy} START
+     * This method initializes the beginning X, Y-coordinates with consideration of any offset.
      * 
      * @param elementLocator
      *            in the form "1;2"
-     * @return {@link LocatorByStart} filled with the following fields:
-     *         startRow, startColumn.
+     * @throws FixtureException 
      */
-    private void initializeStartRowAndColumn(String elementLocator) {
+    private void initializeStartRowAndColumn(String elementLocator) throws FixtureException {
         Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+)");
         Matcher matcher = locatorPattern.matcher(elementLocator);
         if (matcher.matches()) {
@@ -132,21 +140,29 @@ public class LocatorByStart implements Locator {
             this.startColumnWithOffset = this.startColumn + this.offsetColumn;
             checkBoundaries();
         } else {
-            throw new IllegalArgumentException(
-                    "The provided locator did not match the expected pattern \"x;y\" where x and y are both integer values. Got: " + elementLocator);
+            throw new FixtureException(
+                    "The provided locator did not match the expected pattern "
+                    + "\"x;y\" where x and y are both integer values. Got: " + elementLocator , 
+                    FixtureException.keyValues("elementlocator" , elementLocator));
         }
     }
 
     @Override
-    public void checkBoundaries() {
+    public void checkBoundaries() throws FixtureException {
         // because we begin to count startColumn and startRow with 0
         if (startColumn > maxColumn) {
-            String columnExceptionMessage = "Your chosen column '" + startColumn + "' is greater than the maximum column '" + (maxColumn - 1) + "'";
-            throw new IllegalArgumentException(columnExceptionMessage);
+            String columnExceptionMessage = "Your chosen column '" + startColumn + 
+                    "' is greater than the maximum column '" + (maxColumn - 1) + "'";
+            logger.error(columnExceptionMessage);
+            throw new FixtureException(columnExceptionMessage, 
+                    FixtureException.keyValues("startColumn", startColumn, "maxColumn", maxColumn));
         }
         if (startRow > maxRow) {
-            String rowExceptionMessage = "Your chosen row '" + startRow + "' is greater than the maximum row '" + maxRow + "'";
-            throw new IllegalArgumentException(rowExceptionMessage);
+            String rowExceptionMessage = "Your chosen row '" + startRow + 
+                    "' is greater than the maximum row '" + maxRow + "'";
+            logger.error(rowExceptionMessage);
+            throw new FixtureException(rowExceptionMessage, 
+                    FixtureException.keyValues("startRow", startRow, "maxRow", maxRow));
         }
     }
 

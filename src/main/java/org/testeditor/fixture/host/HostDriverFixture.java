@@ -110,20 +110,24 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public boolean connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) throws FixtureException {
-        logger.info("Host-Fixture connecting ...");
+        logger.debug("Host-Fixture connecting ...");
         this.offset = new Offset(-offsetRow, -offsetColumn);
+        logger.trace("Offset to original s3270 screen X-Position = {} ; Y-Position = {}.", offsetColumn, offsetRow); 
         TerminalType type = TerminalType.TYPE_3279;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
+        logger.trace("Used parameters for connection:\n Terminal Type : {} ;\n Character Set : {} ;\n Path to s3270 application : {} ;"
+                + "\n Connected Hostname : {} ;\n Connected Port : {}" , type , charSet, s3270Path, hostname, port);
+        
         timer.startTimer();
         connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
         if (connection.isConnected()) {
             waitUntilScreenIsFormatted(MAX_TIME_TO_WAIT);
             timer.stopTimer();
-            logger.debug("Elapsed time in millis after connect: {}", timer.getElapsedTime());
-            logger.info("successfully connected to host='{}', port='{}'", hostname, port);
+            logger.trace("Elapsed time in millis after connect: {}", timer.getElapsedTime());
+            logger.debug("successfully connected to host='{}', port='{}'", hostname, port);
             return true;
         } else {
-            logger.info("The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
+            logger.error("The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
             return false;
         }
     }
@@ -132,7 +136,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     void waitUntilScreenIsFormatted(int maxIterationThreadSleeping) {
         Status status = connection.getStatus();
         ScreenFormatting screenFormatting = status.getScreenFormatting();
-        logger.debug("Screenformatting : {}", screenFormatting.getFormatting());
+        logger.trace("Screenformatting : {}", screenFormatting.getFormatting());
         Integer i = 0;
         while (status.getScreenFormatting() != ScreenFormatting.FORMATTED && i++ < maxIterationThreadSleeping) {
             performWaits(status);
@@ -145,7 +149,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         } catch (InterruptedException e) {
             logger.error("Something went wrong during wait period: {}", e.getMessage());
         }
-        logger.debug("waited {} ms", THREAD_SLEEP_IN_MILLIS);
+        logger.trace("waited {} ms", THREAD_SLEEP_IN_MILLIS);
         status = connection.getStatus();
     }
 
@@ -156,7 +160,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public boolean disconnect() throws FixtureException {
-        logger.info("Disconnecting ...");
+        logger.debug("Disconnecting ...");
         return connection.disconnect();
     }
 
@@ -168,7 +172,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public Status getStatus() throws FixtureException {
-        logger.info("get Status ...");
+        logger.trace("get Status ...");
         return connection.getStatus();
     }
 
@@ -188,6 +192,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public void typeAt(String elementLocator, LocatorStrategy locatorType, String value) throws FixtureException {
+        logger.debug("Type '{}' at positon {} by locator {} " , value, elementLocator, locatorType);
         Result result = moveCursor(elementLocator, locatorType);
         result.logStatus();
         Status status = result.getStatus();
@@ -198,8 +203,10 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
             // just to see if typed in successfully.
             connection.doCommand("ascii", commandAscii);
         } else {
-            throw new RuntimeException("The field at the position x = '" + status.getCurrentCursorColumn() + "' and y = '"
-                    + status.getCurrentCursorRow() + "' is protected.");
+            int currentCursorColumn = status.getCurrentCursorColumn();
+            int currentCursorRow = status.getCurrentCursorRow();
+            throw new FixtureException("The field at the position x = '" + currentCursorColumn + "' and y = '"
+                    + currentCursorRow + "' is protected.", FixtureException.keyValues("X-Position" , currentCursorColumn, "Y-Position", currentCursorRow ));
         }
     }
 
@@ -220,6 +227,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         waiting(100);
         Command commandString = new Command(command.getCommand(), command.getCommand());
         connection.doCommand(command.getCommand(), commandString);
+        logger.trace("Command : '{}' sent to 3270-Emulator", commandString);
         connection.doCommand("ascii", commandAscii);
     }
 
@@ -238,11 +246,12 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public String readValueAt(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
+        logger.debug("Read value at position {} by {}" , elementLocator, locatorType);
         return getElement(elementLocator, locatorType);
     }
 
     protected String getElement(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
-        logger.info("Lookup element {} type {}", elementLocator, locatorType.name());
+        logger.trace("Lookup element {} type {}", elementLocator, locatorType.name());
         String result = null;
         Status status = getStatus();
         switch (locatorType) {
@@ -259,7 +268,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         return result;
     }
 
-    private String getValueByStartStop(LocatorByStartStop locator) {
+    private String getValueByStartStop(LocatorByStartStop locator) throws FixtureException {
         Command commandAscii = new Command("Ascii", "Ascii");
         Result result = connection.doCommand("ascii", commandAscii);
         List<String> dataLines = result.getDataLines();
@@ -282,7 +291,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         return sb.toString();
     }
 
-    private String getValueByWidth(LocatorByWidth locator) {
+    private String getValueByWidth(LocatorByWidth locator) throws FixtureException {
         Command commandAscii = new Command("Ascii", "Ascii");
         Result result = connection.doCommand("ascii", commandAscii);
         Status status = result.getStatus();
@@ -304,6 +313,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     }
 
     private Result setCursorPosition(int row, int col) {
+        logger.trace("Set cursor position to x = {}, y = {}" , col, row);
         Command command = new Command("MoveCursor", "MoveCursor(" + (row - offset.getOffsetRow()) + "," + (col - offset.getOffsetColumn()) + ")", row,
                 col);
         return connection.doCommand("MoveCursor(" + row + "," + col + ")", command);
@@ -322,6 +332,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public Result moveCursor(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
+        logger.trace("Move cursor to position {} by {}.",elementLocator, locatorType );
         Result result = null;
         Status status = getStatus();
         switch (locatorType) {
@@ -368,6 +379,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public String buildAllFieldsAsString() throws FixtureException {
+        logger.trace("Generate all 3270-Fields on screen as String ...");
         String allFieldAsString = null;
         Command command = new Command("ReadBuffer", "ReadBuffer(Ascii)");
         Result result = connection.doCommand("ReadBuffer(Ascii)", command);
@@ -378,7 +390,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         while (screenFormatting != ScreenFormatting.FORMATTED) {
             waiting(500);
             maxWaitCounter++;
-            logger.debug("waiting 500 ms ...");
+            logger.trace("waiting 500 ms ...");
             result = connection.doCommand("ReadBuffer(Ascii)", command);
             status = result.getStatus();
             screenFormatting = status.getScreenFormatting();
@@ -390,11 +402,12 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         if (screenFormatting == ScreenFormatting.FORMATTED) {
             TerminalScreen screen = new TerminalScreen();
             allFieldAsString = screen.printAllFieldAsString(result.getDataLines());
-            logger.info(allFieldAsString);
+            logger.trace("All fields on screen \n {}", allFieldAsString);
 
         } else {
-            throw new RuntimeException(
-                    "The result of delivered Host-Screen is not formatted, so it is not possible to get any information about fields!");
+            throw new FixtureException(
+                    "The result of delivered Host-Screen is not formatted, "
+                    + "so it is not possible to get any information about fields!");
         }
         return allFieldAsString;
     }
@@ -406,14 +419,14 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         try {
             FileUtils.mkdir(new File(filePath), true);
         } catch (IOException e) {
-            logger.error("Something went wrong while creating test files: ", e);
+            logger.error("Something went wrong while creating screenshot for file {} :", filePath + filename );
         }
         Command command = new Command("PrintText", "PrintText html modi " + filename);
         Result result = connection.doCommand("PrintText html modi " + filename, command);
         if (result.getResultOfCommand().equals("ok")) {
-            logger.info("Wrote screenshot to file='{}'.", filename);
+            logger.trace("Wrote screenshot to file='{}'.", filename);
         } else {
-            logger.warn("An Error occured while taking screenshots. Could not write screenshot to file='{}'.", filename);
+            logger.warn("An Error occured while taking screenshots. Could not write screenshot to file='{}'.", filePath +filename);
         }
     }
 
@@ -431,9 +444,9 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         return ((action == Action.LEAVE) || unit == SemanticUnit.TEST) && connection.isConnected();
     }
 
-	@Override
-	public void reported(SemanticUnit unit, Action action, String message, String id,
-			org.testeditor.fixture.core.TestRunReporter.Status status, Map<String, String> variables) {
+    @Override
+    public void reported(SemanticUnit unit, Action action, String message, String id,
+            org.testeditor.fixture.core.TestRunReporter.Status status, Map<String, String> variables) {
         if (unit == SemanticUnit.TEST && action == Action.ENTER) {
             runningTest = message;
         }
@@ -442,22 +455,22 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         }
 	}
 
-	@Override
-	public void reportFixtureExit(FixtureException fixtureException) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void reportFixtureExit(FixtureException fixtureException) {
+    // TODO Auto-generated method stub
 
-	@Override
-	public void reportExceptionExit(Exception exception) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	@Override
-	public void reportAssertionExit(AssertionError assertionError) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void reportExceptionExit(Exception exception) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void reportAssertionExit(AssertionError assertionError) {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

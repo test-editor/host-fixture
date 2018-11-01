@@ -22,13 +22,13 @@ import org.testeditor.fixture.host.net.Connection;
 
 public class Logging {
 
-    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
+    private static final Logger logger = LoggerFactory.getLogger(Logging.class);
 
     public static void logOutput(List<String> lines, int offsetRow, int offsetColumn) {
         List<String> considerPositionOffsetLines = considerPositionOffset(lines, offsetRow, offsetColumn);
 
         for (String line : considerPositionOffsetLines) {
-            logger.debug(line);
+            logger.trace(line);
         }
     }
 
