@@ -67,9 +67,8 @@ public class LocatorByStartStop implements Locator {
      * @param offset
      *            The offset for the startpoint row and column dependent on the zero
      *            origin of the host screen.
-     * @throws FixtureException 
      */
-    public LocatorByStartStop(int startRow, int startColumn, int endRow, int endColumn, Status status, Offset offset) throws FixtureException {
+    public LocatorByStartStop(int startRow, int startColumn, int endRow, int endColumn, Status status, Offset offset) {
         this.offsetRow = offset.getOffsetRow();
         this.offsetColumn = offset.getOffsetColumn();
         this.startRow = startRow;
@@ -112,9 +111,8 @@ public class LocatorByStartStop implements Locator {
      * @param offset
      *            The offset for the startpoint row and column dependent on the zero
      *            origin of the host screen.
-     * @throws FixtureException 
      */
-    public LocatorByStartStop(String elementLocator, Status status, Offset offset) throws FixtureException {
+    public LocatorByStartStop(String elementLocator, Status status, Offset offset){
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
         this.offsetRow = offset.getOffsetRow();
@@ -181,7 +179,7 @@ public class LocatorByStartStop implements Locator {
      *            in the form "1;2;4;5"
      * @throws FixtureException 
      */
-    private void initializeStartAndEndForRowAndColumn(String elementLocator) throws FixtureException {
+    private void initializeStartAndEndForRowAndColumn(String elementLocator) {
 
         Matcher matcher = locatorPattern.matcher(elementLocator);
         if (matcher.matches()) {
@@ -195,30 +193,29 @@ public class LocatorByStartStop implements Locator {
             this.endColumnWithOffset = this.endColumn + this.offsetColumn;
             checkBoundaries();
         } else {
-            throw new FixtureException(
+            throw new IllegalArgumentException(
                     "The provided locator did not match the expected pattern \"x-Start;x-End;y-Start;y-End;\" "
-                    + "where x-Start and x-End and y-Start and y-End are all integer values. Got: "
-                            + elementLocator, FixtureException.keyValues("elementlocator", elementLocator));
+                    + "where x-Start and x-End and y-Start and y-End are all integer values. Got: " +elementLocator);
         }
     }
 
     @Override
-    public void checkBoundaries() throws FixtureException {
+    public void checkBoundaries()  {
         if (startColumn > maxColumn) {
-            throw new FixtureException("Your chosen column '" + startColumn + "' is greater than the maximum column '" 
-        + maxColumn + "'", FixtureException.keyValues("startColumn" , startColumn, "maxColumn", maxColumn));
+            throw new IllegalArgumentException("Your chosen column '" + startColumn + "' is greater than the maximum column '" 
+        + maxColumn + "'");
         }
         if (startRow > maxRow) {
-            throw new FixtureException("Your chosen row '" + startRow + "' is greater than the maximum row '" 
-        + maxRow + "'", FixtureException.keyValues("startRow" , startRow, "maxRow", maxRow));
+            throw new IllegalArgumentException("Your chosen row '" + startRow + "' is greater than the maximum row '" 
+        + maxRow + "'");
         }
         if (endColumn > maxColumn) {
-            throw new FixtureException("Your chosen column '" + endColumn + "' is greater than the maximum column '" 
-        + maxColumn + "'", FixtureException.keyValues("endColumn" , endColumn, "maxColumn", maxColumn));
+            throw new IllegalArgumentException("Your chosen column '" + endColumn + "' is greater than the maximum column '" 
+        + maxColumn + "'");
         }
         if (endRow > maxRow) {
-            throw new FixtureException("Your chosen row '" + endRow + "' is greater than the maximum row '" 
-        + maxRow + "'", FixtureException.keyValues("endRow" , endRow, "maxRow", maxRow));
+            throw new IllegalArgumentException("Your chosen row '" + endRow + "' is greater than the maximum row '" 
+        + maxRow + "'");
         }
     }
 

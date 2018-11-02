@@ -109,7 +109,7 @@ public class LineReaderTest {
         int endRow = 23;
         int endColumn = 81;
 
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen column '81' is greater than the maximum column '80'");
 
         // when
@@ -127,7 +127,7 @@ public class LineReaderTest {
         int startColumn = 81;
         int endRow = 23;
         int endColumn = 79;
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen column '81' is greater than the maximum column '80'");
 
         // when
@@ -146,7 +146,7 @@ public class LineReaderTest {
         int endRow = 25;
         int endColumn = 79;
 
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen row '25' is greater than the maximum row '24'");
 
         // when
@@ -163,7 +163,7 @@ public class LineReaderTest {
         int startColumn = 1;
         int endRow = 23;
         int endColumn = 79;
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen row '25' is greater than the maximum row '24'");
 
         // when
@@ -224,7 +224,7 @@ public class LineReaderTest {
         int startRow = 25;
         int startColumn = 1;
         int width = 8;
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen row width '25' is greater than the actual maximum row width '24'");
         LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offset);
 
@@ -250,7 +250,7 @@ public class LineReaderTest {
         // when
         String line = "data: Menukey";
         LineReader lineReader = new LineReader();
-        thrown.expect(FixtureException.class);
+        thrown.expect(RuntimeException.class);
         thrown.expectMessage("Your chosen argument width '8' is greater than the actual max column width '7'");
         lineReader.readSingleLineWidth(line, locator);
     }
@@ -262,7 +262,7 @@ public class LineReaderTest {
         int startRow = 1;
         int startColumn = 74;
         int width = 8;
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen start column plus width '82' is greater than the maximum column size'80'");
         LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offset);
         HostScreen hostScreen = new HostScreen();

@@ -107,10 +107,11 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            means the begin point is at row 0 and column 0. The
      *            offsetColumn will rearrange the startpoint around the value
      *            for the column.
+     * @throws FixtureException         
      */
     @FixtureMethod
-    public boolean connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) throws FixtureException {
-        logger.debug("Host-Fixture connecting ...");
+    public Connection connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) throws FixtureException {
+        logger.debug("Host-Fixture connecting to host '{}' on port '{}'with offsetRow {} and offsetColumn {} ...", hostname, port, offsetRow, offsetColumn);
         this.offset = new Offset(-offsetRow, -offsetColumn);
         logger.trace("Offset to original s3270 screen X-Position = {} ; Y-Position = {}.", offsetColumn, offsetRow); 
         TerminalType type = TerminalType.TYPE_3279;
@@ -119,16 +120,16 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
                 + "\n Connected Hostname : {} ;\n Connected Port : {}" , type , charSet, s3270Path, hostname, port);
         
         timer.startTimer();
-        connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
+        Connection hostConnection = connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
         if (connection.isConnected()) {
             waitUntilScreenIsFormatted(MAX_TIME_TO_WAIT);
             timer.stopTimer();
             logger.trace("Elapsed time in millis after connect: {}", timer.getElapsedTime());
             logger.debug("successfully connected to host='{}', port='{}'", hostname, port);
-            return true;
+            return hostConnection;
         } else {
-            logger.error("The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
-            return false;
+           throw new FixtureException("The connection to host '" + hostname + "' on port '" + port + 
+                    "' could not be established.", FixtureException.keyValues("hostname", hostname, "port", port));
         }
     }
 
@@ -171,8 +172,8 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @return {@link org.testeditor.fixture.host.s3270.Status}
      */
     @FixtureMethod
-    public Status getStatus() throws FixtureException {
-        logger.trace("get Status ...");
+    public Status getStatus() {
+        logger.debug("get Status ...");
         return connection.getStatus();
     }
 
@@ -254,21 +255,27 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         logger.trace("Lookup element {} type {}", elementLocator, locatorType.name());
         String result = null;
         Status status = getStatus();
-        switch (locatorType) {
-        case START_STOP:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
-            break;
-        case WIDTH:
-            result = getValueByWidth(new LocatorByWidth(elementLocator, status, offset));
-            break;
-        default:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
-            break;
+        try {
+            switch (locatorType) {
+                case START_STOP:
+                    result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
+                    break;
+                case WIDTH:
+                    result = getValueByWidth(new LocatorByWidth(elementLocator, status, offset));
+                    break;
+                default:
+                    result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
+                    break;
+            }
+            
+        } catch (Exception e) {
+            throw new FixtureException(e.getMessage(), FixtureException.keyValues("elementlocator", elementLocator, 
+                    "locatorType", locatorType, "offset", offset));
         }
         return result;
     }
 
-    private String getValueByStartStop(LocatorByStartStop locator) throws FixtureException {
+    private String getValueByStartStop(LocatorByStartStop locator)  {
         Command commandAscii = new Command("Ascii", "Ascii");
         Result result = connection.doCommand("ascii", commandAscii);
         List<String> dataLines = result.getDataLines();
@@ -291,7 +298,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         return sb.toString();
     }
 
-    private String getValueByWidth(LocatorByWidth locator) throws FixtureException {
+    private String getValueByWidth(LocatorByWidth locator) {
         Command commandAscii = new Command("Ascii", "Ascii");
         Result result = connection.doCommand("ascii", commandAscii);
         Status status = result.getStatus();
@@ -329,26 +336,33 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @param locatorType
      *            see {@link LocatorStrategy}
      * @return {@link Result} of the action.
+     * @throws FixtureException 
      */
     @FixtureMethod
     public Result moveCursor(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
-        logger.trace("Move cursor to position {} by {}.",elementLocator, locatorType );
+        logger.debug("Move cursor to position {} by {}.",elementLocator, locatorType );
         Result result = null;
         Status status = getStatus();
-        switch (locatorType) {
-        case START:
-            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status, offset);
-            result = setCursorPosition(locatorByStart.getStartRowWithOffset(), locatorByStart.getStartColumnWithOffset());
-            break;
-        case START_STOP:
-            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status, offset);
-            result = setCursorPosition(locatorByStartStop.getStartRowWithOffset(), locatorByStartStop.getStartColumnWithOffset());
-            break;
-        case WIDTH:
-            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status, offset);
-            result = setCursorPosition(locatorByWidth.getStartRowWithOffset(), locatorByWidth.getStartColumnWithOffset());
-            break;
-        }
+        try {
+            switch (locatorType) {
+                case START:
+                    LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status, offset);
+                    result = setCursorPosition(locatorByStart.getStartRowWithOffset(), locatorByStart.getStartColumnWithOffset());
+                    break;
+                case START_STOP:
+                    LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status, offset);
+                    result = setCursorPosition(locatorByStartStop.getStartRowWithOffset(), locatorByStartStop.getStartColumnWithOffset());
+                    break;
+                case WIDTH:
+                    LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status, offset);
+                    result = setCursorPosition(locatorByWidth.getStartRowWithOffset(), locatorByWidth.getStartColumnWithOffset());
+                    break;
+            }
+            
+        } catch (Exception e) {
+            throw new FixtureException(e.getMessage(), FixtureException.keyValues("elementlocator", elementLocator, 
+                    "locatorType", locatorType, "offset", offset));
+        } 
         return result;
     }
 
@@ -379,7 +393,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public String buildAllFieldsAsString() throws FixtureException {
-        logger.trace("Generate all 3270-Fields on screen as String ...");
+        logger.debug("Generate all 3270-Fields on screen as String ...");
         String allFieldAsString = null;
         Command command = new Command("ReadBuffer", "ReadBuffer(Ascii)");
         Result result = connection.doCommand("ReadBuffer(Ascii)", command);
@@ -419,7 +433,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         try {
             FileUtils.mkdir(new File(filePath), true);
         } catch (IOException e) {
-            logger.error("Something went wrong while creating screenshot for file {} :", filePath + filename );
+            logger.warn("Something went wrong while creating screenshot for file {} :", filePath + filename );
         }
         Command command = new Command("PrintText", "PrintText html modi " + filename);
         Result result = connection.doCommand("PrintText html modi " + filename, command);
@@ -457,19 +471,19 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
 
     @Override
     public void reportFixtureExit(FixtureException fixtureException) {
-    // TODO Auto-generated method stub
+     // do nothing
 
     }
 
     @Override
     public void reportExceptionExit(Exception exception) {
-        // TODO Auto-generated method stub
+     // do nothing
         
     }
 
     @Override
     public void reportAssertionExit(AssertionError assertionError) {
-        // TODO Auto-generated method stub
+     // do nothing
         
     }
 

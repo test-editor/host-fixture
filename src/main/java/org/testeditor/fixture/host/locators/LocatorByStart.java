@@ -96,7 +96,7 @@ public class LocatorByStart implements Locator {
      *            origin of the host screen.
      * @throws FixtureException 
      */
-    public LocatorByStart(String elementLocator, Status status, Offset offset) throws FixtureException {
+    public LocatorByStart(String elementLocator, Status status, Offset offset) {
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
         this.offsetRow = offset.getOffsetRow();
@@ -128,9 +128,8 @@ public class LocatorByStart implements Locator {
      * 
      * @param elementLocator
      *            in the form "1;2"
-     * @throws FixtureException 
      */
-    private void initializeStartRowAndColumn(String elementLocator) throws FixtureException {
+    private void initializeStartRowAndColumn(String elementLocator) {
         Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+)");
         Matcher matcher = locatorPattern.matcher(elementLocator);
         if (matcher.matches()) {
@@ -140,29 +139,24 @@ public class LocatorByStart implements Locator {
             this.startColumnWithOffset = this.startColumn + this.offsetColumn;
             checkBoundaries();
         } else {
-            throw new FixtureException(
+            throw new IllegalArgumentException(
                     "The provided locator did not match the expected pattern "
-                    + "\"x;y\" where x and y are both integer values. Got: " + elementLocator , 
-                    FixtureException.keyValues("elementlocator" , elementLocator));
+                    + "\"x;y\" where x and y are both integer values. Got: " + elementLocator );
         }
     }
 
     @Override
-    public void checkBoundaries() throws FixtureException {
+    public void checkBoundaries() {
         // because we begin to count startColumn and startRow with 0
         if (startColumn > maxColumn) {
             String columnExceptionMessage = "Your chosen column '" + startColumn + 
                     "' is greater than the maximum column '" + (maxColumn - 1) + "'";
-            logger.error(columnExceptionMessage);
-            throw new FixtureException(columnExceptionMessage, 
-                    FixtureException.keyValues("startColumn", startColumn, "maxColumn", maxColumn));
+            throw new IllegalArgumentException(columnExceptionMessage);
         }
         if (startRow > maxRow) {
             String rowExceptionMessage = "Your chosen row '" + startRow + 
                     "' is greater than the maximum row '" + maxRow + "'";
-            logger.error(rowExceptionMessage);
-            throw new FixtureException(rowExceptionMessage, 
-                    FixtureException.keyValues("startRow", startRow, "maxRow", maxRow));
+            throw new IllegalArgumentException(rowExceptionMessage);
         }
     }
 

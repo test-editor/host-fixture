@@ -122,7 +122,7 @@ public class LocatorByWidth implements Locator {
      *            origin of the host screen.
      * @throws FixtureException 
      */
-    public LocatorByWidth(String elementLocator, Status status, Offset offset) throws FixtureException {
+    public LocatorByWidth(String elementLocator, Status status, Offset offset) {
         this.maxRow = status.getNumberRows();
         this.maxColumn = status.getNumberColumns();
         this.offsetRow = offset.getOffsetRow();
@@ -166,9 +166,9 @@ public class LocatorByWidth implements Locator {
      *            in the form "1;2;45"
      * @return {@link LocatorByWidth} filled with the following fields:
      *         startRow, startColumn, width (number of characters to be read).
-     * @throws FixtureException 
+
      */
-    private void initializeStartRowColumnAndWidth(String elementLocator) throws FixtureException {
+    private void initializeStartRowColumnAndWidth(String elementLocator) {
         Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+);(?<width>\\d+)");
         Matcher matcher = locatorPattern.matcher(elementLocator);
         if (matcher.matches()) {
@@ -179,27 +179,27 @@ public class LocatorByWidth implements Locator {
             this.width = Integer.parseInt(matcher.group("width"));
             this.endColumn = this.startColumn + this.width;
             this.endColumnWithOffset = this.startColumnWithOffset + this.width;
-            checkBoundaries();
+                checkBoundaries();
         } else {
-            throw new FixtureException(
+            throw new IllegalArgumentException(
                     "The provided locator did not match the expected pattern \"x;y;z\" where x, y and z are integer values. Got: "
                             + elementLocator);
         }
     }
 
     @Override
-    public void checkBoundaries() throws FixtureException {
+    public void checkBoundaries() {
         // because we begin to count startColumn and startRow with 0
         if (startColumn > maxColumn) {
-            throw new FixtureException("Your chosen column '" + startColumn
+            throw new IllegalArgumentException("Your chosen column '" + startColumn
                     + "' is greater than the maximum column '" + (maxColumn - 1) + "'");
         }
         if (startRow > maxRow) {
-            throw new FixtureException("Your chosen row width '" + startRow
+            throw new IllegalArgumentException("Your chosen row width '" + startRow
                     + "' is greater than the actual maximum row width '" + maxRow + "'");
         }
         if (endColumn > maxColumn) {
-            throw new FixtureException("Your chosen start column plus width '" + endColumn
+            throw new IllegalArgumentException("Your chosen start column plus width '" + endColumn
                     + "' is greater than the maximum column size'" + maxColumn + "'");
         }
     }

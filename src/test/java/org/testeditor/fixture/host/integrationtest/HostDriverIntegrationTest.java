@@ -21,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.HostDriverFixture;
 import org.testeditor.fixture.host.locators.LocatorStrategy;
+import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.actions.ControlCommand;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
@@ -57,7 +58,8 @@ public class HostDriverIntegrationTest {
         hostUrl = System.getenv("HOST_URL");
         hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
         hostDriverFixture = new HostDriverFixture();
-        Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort, offsetRow, offsetColumn));
+        Connection hostConnection = hostDriverFixture.connect(s3270Path, hostUrl, hostPort, offsetRow, offsetColumn);
+        Assert.assertNotNull(hostConnection);
     }
 
     private void assumeWindowsAndS3270Accessible() {

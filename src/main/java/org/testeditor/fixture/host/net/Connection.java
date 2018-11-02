@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.logging.Logging;
 import org.testeditor.fixture.host.s3270.Result;
 import org.testeditor.fixture.host.s3270.Status;
@@ -115,27 +116,28 @@ public class Connection {
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
      * 
      * @return true if disconnected successful, false otherwise.
+     * @throws FixtureException 
      */
-    public boolean disconnect() {
+    public boolean disconnect() throws FixtureException {
         assertProcessAvailable();
         doQuit();
         stop3270Process();
         try {
             s3270Process.waitFor(5, TimeUnit.SECONDS);
         } catch (final InterruptedException ex) {
-            logger.error("Something went wrong during termination of s2370 process");
+            logger.error("Something went wrong during termination of s3270 process");
         }
         try {
             in.close();
         } catch (final IOException ex) {
-            logger.error("Something went wrong during closing InputStreamreader of s2370 process");
+            logger.error("Something went wrong during closing InputStreamreader of s3270 process");
         }
         cleanup();
         boolean success = !isConnected();
         if (success) {
-            logger.trace("Disconnected successfully from host : {} ", hostname);
+            logger.debug("Disconnected successfully from host : {} ", hostname);
         } else {
-            logger.error("Disconnection failed");
+            throw new FixtureException("Disconnection failed from host '" + hostname + "'", FixtureException.keyValues("hostname", hostname) );
         }
         return success;
     }

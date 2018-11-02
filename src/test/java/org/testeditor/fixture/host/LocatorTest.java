@@ -47,9 +47,9 @@ public class LocatorTest {
     }
 
     @Test
-    public void locatorByStartStopWithTwoArgumentsTest() throws FixtureException {
+    public void locatorByStartStopWithTwoArgumentsTest() {
         String elementLocator = "1;2";
-        thrown.expect(FixtureException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(
                 "The provided locator did not match the expected pattern \"x-Start;x-End;y-Start;y-End;\" where x-Start and x-End and y-Start and y-End are all integer values. Got: 1;2");
         new LocatorByStartStop(elementLocator, status, offset);
