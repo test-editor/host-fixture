@@ -54,7 +54,7 @@ public class HostDriverFixtureTest {
     public void connectionSuccessfulTest() throws FixtureException {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(con);
         when(con.isConnected()).thenReturn(true);
 
@@ -63,7 +63,7 @@ public class HostDriverFixtureTest {
         Offset offset = new Offset(1, 1);
         Status status = new Status(defaultStatusString, offset);
         when(con.getStatus()).thenReturn(status);
-        Connection hostConnection =  fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
+        Connection hostConnection =  fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn, false);
 
         // then
         Assert.assertNotNull(hostConnection);    
@@ -73,7 +73,7 @@ public class HostDriverFixtureTest {
     public void connectionUnsuccessfulThrowsFixtureException() throws FixtureException {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(null);
         when(con.isConnected()).thenReturn(false);
 
@@ -82,7 +82,7 @@ public class HostDriverFixtureTest {
 
         // then
         FixtureException exception = Assertions.assertThrows(FixtureException.class, () -> {
-            fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
+            fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn, false);
           });
         Assert.assertEquals("The connection to host 'HOST_URL' on port '1234' could not be established.", exception.getMessage());
         Map<String, Object> keyValueStore = exception.getKeyValueStore();
@@ -94,7 +94,7 @@ public class HostDriverFixtureTest {
     public void disconnectionSuccessfulTest() throws FixtureException {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(con);
 
         when(con.disconnect()).thenReturn(true);

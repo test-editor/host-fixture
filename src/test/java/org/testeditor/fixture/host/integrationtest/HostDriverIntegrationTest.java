@@ -58,7 +58,7 @@ public class HostDriverIntegrationTest {
         hostUrl = System.getenv("HOST_URL");
         hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
         hostDriverFixture = new HostDriverFixture();
-        Connection hostConnection = hostDriverFixture.connect(s3270Path, hostUrl, hostPort, offsetRow, offsetColumn);
+        Connection hostConnection = hostDriverFixture.connect(s3270Path, hostUrl, hostPort, offsetRow, offsetColumn, false);
         Assert.assertNotNull(hostConnection);
     }
 

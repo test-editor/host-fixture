@@ -91,7 +91,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * subprocess.
      *
      * @param s3270Path
-     *            The path to the s3270/ws3270 application.
+     *           The path to the s3270/ws3270 application.
      * @param hostname
      *            The hostname to be connected to.
      * @param port
@@ -107,20 +107,41 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            means the begin point is at row 0 and column 0. The
      *            offsetColumn will rearrange the startpoint around the value
      *            for the column.
-     * @throws FixtureException         
+     * @param verifyCertificate 
+     *            This boolean value can be true or false. 
+     *            <p>If <b><i>true</i></b> is chosen, several environment variables on test system can be set as follows:
+     *            <br>CADIR : Specifies a directory containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
+     *            <br>CAFILE : Specifies a PEM-format file containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
+     *            <br>CERTFILETYPE : Specifies the type of the certificate file specified by -certfile. Type can be pem or asn1. (OpenSSL only) 
+     *            <br>CERTFILE : Specifies a file containing a client certificate to provide to the host. The default file type is PEM.   
+     *            <br>CHAINFILE : Specifies a certificate chain file in PEM format, containing a certificate to provide to the host,
+     *            as well as one or more intermediate certificates and the CA certificate used to sign that certificate. 
+     *            If -chainfile is specified, it overrides -certfile. (OpenSSL only) 
+     *            <br>CLIENTCERT : Specifies the name of a client certificate to provide to the host. (MacOS only) 
+     *            <br>KEYFILE : Specifies a file containing the private key for the certificate file (specified via -certfile or -chainfile). The default file type is PEM. (OpenSSL only)
+     *            <br>KEYFILETYPE : Specifies the type of the private key file specified by -keyfile. Type can be pem or asn1. (OpenSSL only) 
+     *            <br>KEYPASSWD : Specifies the password for the private key file (OpenSSL) or client certificate file (MacOS), 
+     *            if it is encrypted. The argument can be file:filename, specifying that the password is in a file, 
+     *            or string:string, specifying the password on the command-line directly. 
+     *            If the private key file is encrypted and no -keypasswd option is given, secure connections will not be allowed.  
+     *            <p> If <b><i>false</i></b> is chosen, the connection is established with the parameter <b>"noverifycert"</b> this is for SSL/TLS connections, 
+     *            that do not verify the host certificate.
+     *            <p> For further Connection options see <a href="http://x3270.bgp.nu/s3270-man.html">s3270 Options</a>       
+     * @throws FixtureException 
+     *            A FixtureException is thrown when the connection to the host fails.        
      */
     @FixtureMethod
-    public Connection connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) throws FixtureException {
+    public Connection connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn, boolean verifyCertificate) throws FixtureException {
         logger.debug("Host-Fixture connecting to host '{}' on port '{}'with offsetRow {} and offsetColumn {} ...", hostname, port, offsetRow, offsetColumn);
         this.offset = new Offset(-offsetRow, -offsetColumn);
         logger.trace("Offset to original s3270 screen X-Position = {} ; Y-Position = {}.", offsetColumn, offsetRow); 
         TerminalType type = TerminalType.TYPE_3279;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
         logger.trace("Used parameters for connection:\n Terminal Type : {} ;\n Character Set : {} ;\n Path to s3270 application : {} ;"
-                + "\n Connected Hostname : {} ;\n Connected Port : {}" , type , charSet, s3270Path, hostname, port);
+                + "\n Connected Hostname : {} ;\n Connected Port : {}; \n Verify Certificate : {};" , type , charSet, s3270Path, hostname, port, verifyCertificate);
         
         timer.startTimer();
-        Connection hostConnection = connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
+        Connection hostConnection = connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset, verifyCertificate);
         if (connection.isConnected()) {
             waitUntilScreenIsFormatted(MAX_TIME_TO_WAIT);
             timer.stopTimer();

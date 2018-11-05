@@ -89,16 +89,25 @@ public class Connection {
      *            the type e.g 3278 or 23279 see {@link TerminalType}
      * @param mode
      *            this is number from 2 to 5 see {@link TerminalMode}
-     *
+     * @param charSet 
+     *            the character set "german-euro" means character set ISO8859-15.is used 
+     *            For further information about character sets to use, see <a href="http://x3270.bgp.nu/Unix/s3270-man.html">Character Set for X3270 </a>
+     * @param offset 
+     *            the offset to the original host screen. 
+     * @param veryfyCertification
+     *           
+     * @return
      */
     public Connection connect(String s3270Path, String hostname, int port, TerminalType type, TerminalMode mode,
-            CharacterSet charSet, Offset offset) {
+            CharacterSet charSet, Offset offset, boolean verifyCertificate) {
         this.hostname = hostname;
         this.offset = offset;
         String commandLine = String.format("%s -charset %s -model %s-%d %s:%d -utf8", s3270Path, charSet.getCharSet(),
                 type.getType(), mode.getMode(), hostname, port);
+        commandLine = expandCommandLineForCertificate(verifyCertificate, commandLine);
+        
         try {
-            logger.trace("executing " + commandLine);
+            logger.trace("executing '" + commandLine + "'");
             s3270Process = Runtime.getRuntime().exec(commandLine);
 
             out = new PrintWriter(new OutputStreamWriter(s3270Process.getOutputStream()));
@@ -110,6 +119,45 @@ public class Connection {
             throw new RuntimeException("IO Exception while starting " + s3270Path, ex);
         }
 
+    }
+
+    protected String expandCommandLineForCertificate(boolean verifyCertificate, String commandLine) {
+        // This part is only necessary when host certification should be used 
+        if (verifyCertificate) {
+            StringBuffer buffer = new StringBuffer(commandLine);
+            final String CADIR = System.getProperty("CADIR"); 
+            final String CAFILE = System.getProperty("CAFILE");
+            final String CERTFILETYPE = System.getProperty("CERTFILETYPE");
+            final String CERTFILE = System.getProperty("CERTFILE");
+            final String CHAINFILE = System.getProperty("CHAINFILE");
+            final String CLIENTCERT = System.getProperty("CLIENTCERT");
+            final String KEYFILE = System.getProperty("KEYFILE");
+            final String KEYFILETYPE = System.getProperty("KEYFILETYPE");
+            final String KEYPASSWD = System.getProperty("KEYPASSWD");
+            
+            if (CADIR != null && CADIR.length() > 0) {
+                buffer.append(" -cadir" + CADIR);
+            } else if (CAFILE != null && CAFILE.length() > 0) {
+                buffer.append(" -cafile" + CAFILE);
+            } else if (CERTFILETYPE != null && CERTFILETYPE.length() > 0) {
+                buffer.append(" -certfiletype" + CERTFILETYPE);
+            } else if (CERTFILE != null && CERTFILE.length() > 0) {
+                buffer.append(" -certfile" + CERTFILE);
+            } else if (CHAINFILE != null && CHAINFILE.length() > 0) {
+                buffer.append(" -chainfile" + CHAINFILE);
+            } else if (CLIENTCERT != null && CLIENTCERT.length() > 0) {
+                buffer.append(" -clientcert" + CLIENTCERT);
+            } else if (KEYFILE != null && KEYFILE.length() > 0) {
+                buffer.append(" -keyfile" + KEYFILE);
+            } else if (KEYFILETYPE != null && KEYFILETYPE.length() > 0) {
+                buffer.append(" -keyfiletype" + KEYFILETYPE);
+            } else if (KEYPASSWD != null && KEYPASSWD.length() > 0) {
+                buffer.append(" -keypasswd" + KEYPASSWD);
+            } 
+        }else {
+            commandLine = commandLine + " -noverifycert";
+        }
+        return commandLine;
     }
 
     /**
