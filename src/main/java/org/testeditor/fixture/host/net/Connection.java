@@ -35,6 +35,8 @@ import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
 import org.testeditor.fixture.host.screen.Offset;
 
+import com.github.jknack.handlebars.Options.Buffer;
+
 public class Connection {
 
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
@@ -125,15 +127,15 @@ public class Connection {
         // This part is only necessary when host certification should be used 
         if (verifyCertificate) {
             StringBuffer buffer = new StringBuffer(commandLine);
-            final String CADIR = System.getProperty("CADIR"); 
-            final String CAFILE = System.getProperty("CAFILE");
-            final String CERTFILETYPE = System.getProperty("CERTFILETYPE");
-            final String CERTFILE = System.getProperty("CERTFILE");
-            final String CHAINFILE = System.getProperty("CHAINFILE");
-            final String CLIENTCERT = System.getProperty("CLIENTCERT");
-            final String KEYFILE = System.getProperty("KEYFILE");
-            final String KEYFILETYPE = System.getProperty("KEYFILETYPE");
-            final String KEYPASSWD = System.getProperty("KEYPASSWD");
+            final String CADIR = System.getProperty("HOSTFIXTURE_CADIR"); 
+            final String CAFILE = System.getProperty("HOSTFIXTURE_CAFILE");
+            final String CERTFILETYPE = System.getProperty("HOSTFIXTURE_CERTFILETYPE");
+            final String CERTFILE = System.getProperty("HOSTFIXTURE_CERTFILE");
+            final String CHAINFILE = System.getProperty("HOSTFIXTURE_CHAINFILE");
+            final String CLIENTCERT = System.getProperty("HOSTFIXTURE_CLIENTCERT");
+            final String KEYFILE = System.getProperty("HOSTFIXTURE_KEYFILE");
+            final String KEYFILETYPE = System.getProperty("HOSTFIXTURE_KEYFILETYPE");
+            final String KEYPASSWD = System.getProperty("HOSTFIXTURE_KEYPASSWD");
             
             if (CADIR != null && CADIR.length() > 0) {
                 buffer.append(" -cadir" + CADIR);
@@ -154,10 +156,10 @@ public class Connection {
             } else if (KEYPASSWD != null && KEYPASSWD.length() > 0) {
                 buffer.append(" -keypasswd" + KEYPASSWD);
             } 
-        }else {
-            commandLine = commandLine + " -noverifycert";
+              return buffer.toString();
+            }else {
+            return commandLine + " -noverifycert";
         }
-        return commandLine;
     }
 
     /**
@@ -173,12 +175,12 @@ public class Connection {
         try {
             s3270Process.waitFor(5, TimeUnit.SECONDS);
         } catch (final InterruptedException ex) {
-            logger.error("Something went wrong during termination of s3270 process");
+            logger.warn("Something went wrong during termination of s3270 process");
         }
         try {
             in.close();
         } catch (final IOException ex) {
-            logger.error("Something went wrong during closing InputStreamreader of s3270 process");
+            logger.warn("Something went wrong during closing InputStreamreader of s3270 process");
         }
         cleanup();
         boolean success = !isConnected();

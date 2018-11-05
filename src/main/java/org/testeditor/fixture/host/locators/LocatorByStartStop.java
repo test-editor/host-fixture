@@ -177,7 +177,7 @@ public class LocatorByStartStop implements Locator {
      * 
      * @param elementLocator
      *            in the form "1;2;4;5"
-     * @throws FixtureException 
+     * @throws IllegalArgumentException 
      */
     private void initializeStartAndEndForRowAndColumn(String elementLocator) {
 

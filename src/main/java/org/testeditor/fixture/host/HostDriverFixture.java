@@ -110,17 +110,17 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @param verifyCertificate 
      *            This boolean value can be true or false. 
      *            <p>If <b><i>true</i></b> is chosen, several environment variables on test system can be set as follows:
-     *            <br>CADIR : Specifies a directory containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
-     *            <br>CAFILE : Specifies a PEM-format file containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
-     *            <br>CERTFILETYPE : Specifies the type of the certificate file specified by -certfile. Type can be pem or asn1. (OpenSSL only) 
-     *            <br>CERTFILE : Specifies a file containing a client certificate to provide to the host. The default file type is PEM.   
-     *            <br>CHAINFILE : Specifies a certificate chain file in PEM format, containing a certificate to provide to the host,
+     *            <br>HOSTFIXTURE_CADIR : Specifies a directory containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
+     *            <br>HOSTFIXTURE_CAFILE : Specifies a PEM-format file containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
+     *            <br>HOSTFIXTURE_CERTFILETYPE : Specifies the type of the certificate file specified by -certfile. Type can be pem or asn1. (OpenSSL only) 
+     *            <br>HOSTFIXTURE_CERTFILE : Specifies a file containing a client certificate to provide to the host. The default file type is PEM.   
+     *            <br>HOSTFIXTURE_CHAINFILE : Specifies a certificate chain file in PEM format, containing a certificate to provide to the host,
      *            as well as one or more intermediate certificates and the CA certificate used to sign that certificate. 
      *            If -chainfile is specified, it overrides -certfile. (OpenSSL only) 
-     *            <br>CLIENTCERT : Specifies the name of a client certificate to provide to the host. (MacOS only) 
-     *            <br>KEYFILE : Specifies a file containing the private key for the certificate file (specified via -certfile or -chainfile). The default file type is PEM. (OpenSSL only)
-     *            <br>KEYFILETYPE : Specifies the type of the private key file specified by -keyfile. Type can be pem or asn1. (OpenSSL only) 
-     *            <br>KEYPASSWD : Specifies the password for the private key file (OpenSSL) or client certificate file (MacOS), 
+     *            <br>HOSTFIXTURE_CLIENTCERT : Specifies the name of a client certificate to provide to the host. (MacOS only) 
+     *            <br>HOSTFIXTURE_KEYFILE : Specifies a file containing the private key for the certificate file (specified via -certfile or -chainfile). The default file type is PEM. (OpenSSL only)
+     *            <br>HOSTFIXTURE_KEYFILETYPE : Specifies the type of the private key file specified by -keyfile. Type can be pem or asn1. (OpenSSL only) 
+     *            <br>HOSTFIXTURE_KEYPASSWD : Specifies the password for the private key file (OpenSSL) or client certificate file (MacOS), 
      *            if it is encrypted. The argument can be file:filename, specifying that the password is in a file, 
      *            or string:string, specifying the password on the command-line directly. 
      *            If the private key file is encrypted and no -keypasswd option is given, secure connections will not be allowed.  
@@ -291,7 +291,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
             
         } catch (Exception e) {
             throw new FixtureException(e.getMessage(), FixtureException.keyValues("elementlocator", elementLocator, 
-                    "locatorType", locatorType, "offset", offset));
+                    "locatorType", locatorType, "offset", offset), e);
         }
         return result;
     }
@@ -382,7 +382,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
             
         } catch (Exception e) {
             throw new FixtureException(e.getMessage(), FixtureException.keyValues("elementlocator", elementLocator, 
-                    "locatorType", locatorType, "offset", offset));
+                    "locatorType", locatorType, "offset", offset), e);
         } 
         return result;
     }
