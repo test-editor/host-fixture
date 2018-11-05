@@ -21,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.HostDriverFixture;
 import org.testeditor.fixture.host.locators.LocatorStrategy;
+import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.s3270.actions.ControlCommand;
 import org.testeditor.fixture.host.s3270.options.TerminalMode;
@@ -57,11 +58,13 @@ public class HostDriverIntegrationTest {
         hostUrl = System.getenv("HOST_URL");
         hostPort = Integer.parseInt(System.getenv("HOST_PORT"));
         hostDriverFixture = new HostDriverFixture();
-        Assert.assertTrue(hostDriverFixture.connect(s3270Path, hostUrl, hostPort, offsetRow, offsetColumn));
+        Connection hostConnection = hostDriverFixture.connect(s3270Path, hostUrl, hostPort, offsetRow, offsetColumn, false);
+        Assert.assertNotNull(hostConnection);
     }
 
     private void assumeWindowsAndS3270Accessible() {
         Assume.assumeTrue("This is not a Windows OS - ignoring test", S3270Helper.isOsWindows());
+        // This path is to be set when tests are executed under Windows with e.g. following S3270_PATH=c:\dev\tools\wc3270\ws3270.exe
         s3270Path = System.getenv("S3270_PATH");
         Assume.assumeTrue("The path to the s3270 driver is not present - ignoring test",
                 S3270Helper.isS3270DriverPresent(s3270Path));

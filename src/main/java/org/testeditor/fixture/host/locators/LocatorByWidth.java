@@ -15,6 +15,8 @@ package org.testeditor.fixture.host.locators;
 import java.lang.reflect.Constructor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.s3270.Status;
 import org.testeditor.fixture.host.screen.Offset;
 
@@ -82,8 +84,9 @@ public class LocatorByWidth implements Locator {
      * @param offsetColumn
      *            The offset for the startpoint column in dependence on the zero
      *            origin of the host screen.
+     * @throws FixtureException 
      */
-    public LocatorByWidth(int startRow, int startColumn, int width, Status status, Offset offset) {
+    public LocatorByWidth(int startRow, int startColumn, int width, Status status, Offset offset) throws FixtureException {
         this.offsetRow = offset.getOffsetRow();
         this.offsetColumn = offset.getOffsetColumn();
         this.maxRow = status.getNumberRows();
@@ -117,6 +120,7 @@ public class LocatorByWidth implements Locator {
      * @param offsetColumn
      *            The offset for the startpoint column in dependence on the zero
      *            origin of the host screen.
+     * @throws FixtureException 
      */
     public LocatorByWidth(String elementLocator, Status status, Offset offset) {
         this.maxRow = status.getNumberRows();
@@ -162,6 +166,7 @@ public class LocatorByWidth implements Locator {
      *            in the form "1;2;45"
      * @return {@link LocatorByWidth} filled with the following fields:
      *         startRow, startColumn, width (number of characters to be read).
+
      */
     private void initializeStartRowColumnAndWidth(String elementLocator) {
         Pattern locatorPattern = Pattern.compile("(?<startRow>\\d+);(?<startColumn>\\d+);(?<width>\\d+)");
@@ -174,7 +179,7 @@ public class LocatorByWidth implements Locator {
             this.width = Integer.parseInt(matcher.group("width"));
             this.endColumn = this.startColumn + this.width;
             this.endColumnWithOffset = this.startColumnWithOffset + this.width;
-            checkBoundaries();
+                checkBoundaries();
         } else {
             throw new IllegalArgumentException(
                     "The provided locator did not match the expected pattern \"x;y;z\" where x, y and z are integer values. Got: "

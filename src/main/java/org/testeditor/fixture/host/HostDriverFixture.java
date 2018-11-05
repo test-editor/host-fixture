@@ -91,7 +91,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * subprocess.
      *
      * @param s3270Path
-     *            The path to the s3270/ws3270 application.
+     *           The path to the s3270/ws3270 application.
      * @param hostname
      *            The hostname to be connected to.
      * @param port
@@ -107,24 +107,50 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      *            means the begin point is at row 0 and column 0. The
      *            offsetColumn will rearrange the startpoint around the value
      *            for the column.
+     * @param verifyCertificate 
+     *            This boolean value can be true or false. 
+     *            <p>If <b><i>true</i></b> is chosen, several environment variables on test system can be set as follows:
+     *            <br>HOSTFIXTURE_CADIR : Specifies a directory containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
+     *            <br>HOSTFIXTURE_CAFILE : Specifies a PEM-format file containing CA (root) certificates to use when verifying a certificate provided by the host. (OpenSSL only). 
+     *            <br>HOSTFIXTURE_CERTFILETYPE : Specifies the type of the certificate file specified by -certfile. Type can be pem or asn1. (OpenSSL only) 
+     *            <br>HOSTFIXTURE_CERTFILE : Specifies a file containing a client certificate to provide to the host. The default file type is PEM.   
+     *            <br>HOSTFIXTURE_CHAINFILE : Specifies a certificate chain file in PEM format, containing a certificate to provide to the host,
+     *            as well as one or more intermediate certificates and the CA certificate used to sign that certificate. 
+     *            If -chainfile is specified, it overrides -certfile. (OpenSSL only) 
+     *            <br>HOSTFIXTURE_CLIENTCERT : Specifies the name of a client certificate to provide to the host. (MacOS only) 
+     *            <br>HOSTFIXTURE_KEYFILE : Specifies a file containing the private key for the certificate file (specified via -certfile or -chainfile). The default file type is PEM. (OpenSSL only)
+     *            <br>HOSTFIXTURE_KEYFILETYPE : Specifies the type of the private key file specified by -keyfile. Type can be pem or asn1. (OpenSSL only) 
+     *            <br>HOSTFIXTURE_KEYPASSWD : Specifies the password for the private key file (OpenSSL) or client certificate file (MacOS), 
+     *            if it is encrypted. The argument can be file:filename, specifying that the password is in a file, 
+     *            or string:string, specifying the password on the command-line directly. 
+     *            If the private key file is encrypted and no -keypasswd option is given, secure connections will not be allowed.  
+     *            <p> If <b><i>false</i></b> is chosen, the connection is established with the parameter <b>"noverifycert"</b> this is for SSL/TLS connections, 
+     *            that do not verify the host certificate.
+     *            <p> For further Connection options see <a href="http://x3270.bgp.nu/s3270-man.html">s3270 Options</a>       
+     * @throws FixtureException 
+     *            A FixtureException is thrown when the connection to the host fails.        
      */
     @FixtureMethod
-    public boolean connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn) throws FixtureException {
-        logger.info("Host-Fixture connecting ...");
+    public Connection connect(String s3270Path, String hostname, int port, int offsetRow, int offsetColumn, boolean verifyCertificate) throws FixtureException {
+        logger.debug("Host-Fixture connecting to host '{}' on port '{}'with offsetRow {} and offsetColumn {} ...", hostname, port, offsetRow, offsetColumn);
         this.offset = new Offset(-offsetRow, -offsetColumn);
+        logger.trace("Offset to original s3270 screen X-Position = {} ; Y-Position = {}.", offsetColumn, offsetRow); 
         TerminalType type = TerminalType.TYPE_3279;
         CharacterSet charSet = CharacterSet.CHAR_GERMAN_EURO;
+        logger.trace("Used parameters for connection:\n Terminal Type : {} ;\n Character Set : {} ;\n Path to s3270 application : {} ;"
+                + "\n Connected Hostname : {} ;\n Connected Port : {}; \n Verify Certificate : {};" , type , charSet, s3270Path, hostname, port, verifyCertificate);
+        
         timer.startTimer();
-        connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset);
+        Connection hostConnection = connection.connect(s3270Path, hostname, port, type, terminalMode, charSet, offset, verifyCertificate);
         if (connection.isConnected()) {
             waitUntilScreenIsFormatted(MAX_TIME_TO_WAIT);
             timer.stopTimer();
-            logger.debug("Elapsed time in millis after connect: {}", timer.getElapsedTime());
-            logger.info("successfully connected to host='{}', port='{}'", hostname, port);
-            return true;
+            logger.trace("Elapsed time in millis after connect: {}", timer.getElapsedTime());
+            logger.debug("successfully connected to host='{}', port='{}'", hostname, port);
+            return hostConnection;
         } else {
-            logger.info("The connection to host '" + hostname + "' on port '" + port + "' could not be established.");
-            return false;
+           throw new FixtureException("The connection to host '" + hostname + "' on port '" + port + 
+                    "' could not be established.", FixtureException.keyValues("hostname", hostname, "port", port));
         }
     }
 
@@ -132,7 +158,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     void waitUntilScreenIsFormatted(int maxIterationThreadSleeping) {
         Status status = connection.getStatus();
         ScreenFormatting screenFormatting = status.getScreenFormatting();
-        logger.debug("Screenformatting : {}", screenFormatting.getFormatting());
+        logger.trace("Screenformatting : {}", screenFormatting.getFormatting());
         Integer i = 0;
         while (status.getScreenFormatting() != ScreenFormatting.FORMATTED && i++ < maxIterationThreadSleeping) {
             performWaits(status);
@@ -145,7 +171,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         } catch (InterruptedException e) {
             logger.error("Something went wrong during wait period: {}", e.getMessage());
         }
-        logger.debug("waited {} ms", THREAD_SLEEP_IN_MILLIS);
+        logger.trace("waited {} ms", THREAD_SLEEP_IN_MILLIS);
         status = connection.getStatus();
     }
 
@@ -156,7 +182,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public boolean disconnect() throws FixtureException {
-        logger.info("Disconnecting ...");
+        logger.debug("Disconnecting ...");
         return connection.disconnect();
     }
 
@@ -167,8 +193,8 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @return {@link org.testeditor.fixture.host.s3270.Status}
      */
     @FixtureMethod
-    public Status getStatus() throws FixtureException {
-        logger.info("get Status ...");
+    public Status getStatus() {
+        logger.debug("get Status ...");
         return connection.getStatus();
     }
 
@@ -188,6 +214,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public void typeAt(String elementLocator, LocatorStrategy locatorType, String value) throws FixtureException {
+        logger.debug("Type '{}' at positon {} by locator {} " , value, elementLocator, locatorType);
         Result result = moveCursor(elementLocator, locatorType);
         result.logStatus();
         Status status = result.getStatus();
@@ -198,8 +225,10 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
             // just to see if typed in successfully.
             connection.doCommand("ascii", commandAscii);
         } else {
-            throw new RuntimeException("The field at the position x = '" + status.getCurrentCursorColumn() + "' and y = '"
-                    + status.getCurrentCursorRow() + "' is protected.");
+            int currentCursorColumn = status.getCurrentCursorColumn();
+            int currentCursorRow = status.getCurrentCursorRow();
+            throw new FixtureException("The field at the position x = '" + currentCursorColumn + "' and y = '"
+                    + currentCursorRow + "' is protected.", FixtureException.keyValues("X-Position" , currentCursorColumn, "Y-Position", currentCursorRow ));
         }
     }
 
@@ -220,6 +249,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         waiting(100);
         Command commandString = new Command(command.getCommand(), command.getCommand());
         connection.doCommand(command.getCommand(), commandString);
+        logger.trace("Command : '{}' sent to 3270-Emulator", commandString);
         connection.doCommand("ascii", commandAscii);
     }
 
@@ -238,28 +268,35 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public String readValueAt(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
+        logger.debug("Read value at position {} by {}" , elementLocator, locatorType);
         return getElement(elementLocator, locatorType);
     }
 
     protected String getElement(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
-        logger.info("Lookup element {} type {}", elementLocator, locatorType.name());
+        logger.trace("Lookup element {} type {}", elementLocator, locatorType.name());
         String result = null;
         Status status = getStatus();
-        switch (locatorType) {
-        case START_STOP:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
-            break;
-        case WIDTH:
-            result = getValueByWidth(new LocatorByWidth(elementLocator, status, offset));
-            break;
-        default:
-            result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
-            break;
+        try {
+            switch (locatorType) {
+                case START_STOP:
+                    result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
+                    break;
+                case WIDTH:
+                    result = getValueByWidth(new LocatorByWidth(elementLocator, status, offset));
+                    break;
+                default:
+                    result = getValueByStartStop(new LocatorByStartStop(elementLocator, status, offset));
+                    break;
+            }
+            
+        } catch (Exception e) {
+            throw new FixtureException(e.getMessage(), FixtureException.keyValues("elementlocator", elementLocator, 
+                    "locatorType", locatorType, "offset", offset), e);
         }
         return result;
     }
 
-    private String getValueByStartStop(LocatorByStartStop locator) {
+    private String getValueByStartStop(LocatorByStartStop locator)  {
         Command commandAscii = new Command("Ascii", "Ascii");
         Result result = connection.doCommand("ascii", commandAscii);
         List<String> dataLines = result.getDataLines();
@@ -304,6 +341,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     }
 
     private Result setCursorPosition(int row, int col) {
+        logger.trace("Set cursor position to x = {}, y = {}" , col, row);
         Command command = new Command("MoveCursor", "MoveCursor(" + (row - offset.getOffsetRow()) + "," + (col - offset.getOffsetColumn()) + ")", row,
                 col);
         return connection.doCommand("MoveCursor(" + row + "," + col + ")", command);
@@ -319,25 +357,33 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      * @param locatorType
      *            see {@link LocatorStrategy}
      * @return {@link Result} of the action.
+     * @throws FixtureException 
      */
     @FixtureMethod
     public Result moveCursor(String elementLocator, LocatorStrategy locatorType) throws FixtureException {
+        logger.debug("Move cursor to position {} by {}.",elementLocator, locatorType );
         Result result = null;
         Status status = getStatus();
-        switch (locatorType) {
-        case START:
-            LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status, offset);
-            result = setCursorPosition(locatorByStart.getStartRowWithOffset(), locatorByStart.getStartColumnWithOffset());
-            break;
-        case START_STOP:
-            LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status, offset);
-            result = setCursorPosition(locatorByStartStop.getStartRowWithOffset(), locatorByStartStop.getStartColumnWithOffset());
-            break;
-        case WIDTH:
-            LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status, offset);
-            result = setCursorPosition(locatorByWidth.getStartRowWithOffset(), locatorByWidth.getStartColumnWithOffset());
-            break;
-        }
+        try {
+            switch (locatorType) {
+                case START:
+                    LocatorByStart locatorByStart = new LocatorByStart(elementLocator, status, offset);
+                    result = setCursorPosition(locatorByStart.getStartRowWithOffset(), locatorByStart.getStartColumnWithOffset());
+                    break;
+                case START_STOP:
+                    LocatorByStartStop locatorByStartStop = new LocatorByStartStop(elementLocator, status, offset);
+                    result = setCursorPosition(locatorByStartStop.getStartRowWithOffset(), locatorByStartStop.getStartColumnWithOffset());
+                    break;
+                case WIDTH:
+                    LocatorByWidth locatorByWidth = new LocatorByWidth(elementLocator, status, offset);
+                    result = setCursorPosition(locatorByWidth.getStartRowWithOffset(), locatorByWidth.getStartColumnWithOffset());
+                    break;
+            }
+            
+        } catch (Exception e) {
+            throw new FixtureException(e.getMessage(), FixtureException.keyValues("elementlocator", elementLocator, 
+                    "locatorType", locatorType, "offset", offset), e);
+        } 
         return result;
     }
 
@@ -368,6 +414,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
      */
     @FixtureMethod
     public String buildAllFieldsAsString() throws FixtureException {
+        logger.debug("Generate all 3270-Fields on screen as String ...");
         String allFieldAsString = null;
         Command command = new Command("ReadBuffer", "ReadBuffer(Ascii)");
         Result result = connection.doCommand("ReadBuffer(Ascii)", command);
@@ -378,7 +425,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         while (screenFormatting != ScreenFormatting.FORMATTED) {
             waiting(500);
             maxWaitCounter++;
-            logger.debug("waiting 500 ms ...");
+            logger.trace("waiting 500 ms ...");
             result = connection.doCommand("ReadBuffer(Ascii)", command);
             status = result.getStatus();
             screenFormatting = status.getScreenFormatting();
@@ -390,11 +437,12 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         if (screenFormatting == ScreenFormatting.FORMATTED) {
             TerminalScreen screen = new TerminalScreen();
             allFieldAsString = screen.printAllFieldAsString(result.getDataLines());
-            logger.info(allFieldAsString);
+            logger.trace("All fields on screen \n {}", allFieldAsString);
 
         } else {
-            throw new RuntimeException(
-                    "The result of delivered Host-Screen is not formatted, so it is not possible to get any information about fields!");
+            throw new FixtureException(
+                    "The result of delivered Host-Screen is not formatted, "
+                    + "so it is not possible to get any information about fields!");
         }
         return allFieldAsString;
     }
@@ -406,14 +454,14 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         try {
             FileUtils.mkdir(new File(filePath), true);
         } catch (IOException e) {
-            logger.error("Something went wrong while creating test files: ", e);
+            logger.warn("Something went wrong while creating screenshot for file {} :", filePath + filename );
         }
         Command command = new Command("PrintText", "PrintText html modi " + filename);
         Result result = connection.doCommand("PrintText html modi " + filename, command);
         if (result.getResultOfCommand().equals("ok")) {
-            logger.info("Wrote screenshot to file='{}'.", filename);
+            logger.trace("Wrote screenshot to file='{}'.", filename);
         } else {
-            logger.warn("An Error occured while taking screenshots. Could not write screenshot to file='{}'.", filename);
+            logger.warn("An Error occured while taking screenshots. Could not write screenshot to file='{}'.", filePath +filename);
         }
     }
 
@@ -431,9 +479,9 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         return ((action == Action.LEAVE) || unit == SemanticUnit.TEST) && connection.isConnected();
     }
 
-	@Override
-	public void reported(SemanticUnit unit, Action action, String message, String id,
-			org.testeditor.fixture.core.TestRunReporter.Status status, Map<String, String> variables) {
+    @Override
+    public void reported(SemanticUnit unit, Action action, String message, String id,
+            org.testeditor.fixture.core.TestRunReporter.Status status, Map<String, String> variables) {
         if (unit == SemanticUnit.TEST && action == Action.ENTER) {
             runningTest = message;
         }
@@ -442,22 +490,22 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
         }
 	}
 
-	@Override
-	public void reportFixtureExit(FixtureException fixtureException) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void reportFixtureExit(FixtureException fixtureException) {
+     // do nothing
 
-	@Override
-	public void reportExceptionExit(Exception exception) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	@Override
-	public void reportAssertionExit(AssertionError assertionError) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void reportExceptionExit(Exception exception) {
+     // do nothing
+        
+    }
+
+    @Override
+    public void reportAssertionExit(AssertionError assertionError) {
+     // do nothing
+        
+    }
 
 }

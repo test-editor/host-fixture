@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.logging.Logging;
 import org.testeditor.fixture.host.s3270.Result;
 import org.testeditor.fixture.host.s3270.Status;
@@ -88,16 +89,25 @@ public class Connection {
      *            the type e.g 3278 or 23279 see {@link TerminalType}
      * @param mode
      *            this is number from 2 to 5 see {@link TerminalMode}
-     *
+     * @param charSet 
+     *            the character set "german-euro" means character set ISO8859-15.is used 
+     *            For further information about character sets to use, see <a href="http://x3270.bgp.nu/Unix/s3270-man.html">Character Set for X3270 </a>
+     * @param offset 
+     *            the offset to the original host screen. 
+     * @param veryfyCertification
+     *           
+     * @return
      */
     public Connection connect(String s3270Path, String hostname, int port, TerminalType type, TerminalMode mode,
-            CharacterSet charSet, Offset offset) {
+            CharacterSet charSet, Offset offset, boolean verifyCertificate) {
         this.hostname = hostname;
         this.offset = offset;
         String commandLine = String.format("%s -charset %s -model %s-%d %s:%d -utf8", s3270Path, charSet.getCharSet(),
                 type.getType(), mode.getMode(), hostname, port);
+        commandLine = expandCommandLineForCertificate(verifyCertificate, commandLine);
+        
         try {
-            logger.debug("executing " + commandLine);
+            logger.trace("executing '" + commandLine + "'");
             s3270Process = Runtime.getRuntime().exec(commandLine);
 
             out = new PrintWriter(new OutputStreamWriter(s3270Process.getOutputStream()));
@@ -111,31 +121,71 @@ public class Connection {
 
     }
 
+    protected String expandCommandLineForCertificate(boolean verifyCertificate, String commandLine) {
+        // This part is only necessary when host certification should be used 
+        if (verifyCertificate) {
+            StringBuffer buffer = new StringBuffer(commandLine);
+            final String CADIR = System.getProperty("HOSTFIXTURE_CADIR"); 
+            final String CAFILE = System.getProperty("HOSTFIXTURE_CAFILE");
+            final String CERTFILETYPE = System.getProperty("HOSTFIXTURE_CERTFILETYPE");
+            final String CERTFILE = System.getProperty("HOSTFIXTURE_CERTFILE");
+            final String CHAINFILE = System.getProperty("HOSTFIXTURE_CHAINFILE");
+            final String CLIENTCERT = System.getProperty("HOSTFIXTURE_CLIENTCERT");
+            final String KEYFILE = System.getProperty("HOSTFIXTURE_KEYFILE");
+            final String KEYFILETYPE = System.getProperty("HOSTFIXTURE_KEYFILETYPE");
+            final String KEYPASSWD = System.getProperty("HOSTFIXTURE_KEYPASSWD");
+            
+            if (CADIR != null && CADIR.length() > 0) {
+                buffer.append(" -cadir" + CADIR);
+            } else if (CAFILE != null && CAFILE.length() > 0) {
+                buffer.append(" -cafile" + CAFILE);
+            } else if (CERTFILETYPE != null && CERTFILETYPE.length() > 0) {
+                buffer.append(" -certfiletype" + CERTFILETYPE);
+            } else if (CERTFILE != null && CERTFILE.length() > 0) {
+                buffer.append(" -certfile" + CERTFILE);
+            } else if (CHAINFILE != null && CHAINFILE.length() > 0) {
+                buffer.append(" -chainfile" + CHAINFILE);
+            } else if (CLIENTCERT != null && CLIENTCERT.length() > 0) {
+                buffer.append(" -clientcert" + CLIENTCERT);
+            } else if (KEYFILE != null && KEYFILE.length() > 0) {
+                buffer.append(" -keyfile" + KEYFILE);
+            } else if (KEYFILETYPE != null && KEYFILETYPE.length() > 0) {
+                buffer.append(" -keyfiletype" + KEYFILETYPE);
+            } else if (KEYPASSWD != null && KEYPASSWD.length() > 0) {
+                buffer.append(" -keypasswd" + KEYPASSWD);
+            } 
+              return buffer.toString();
+            }else {
+            return commandLine + " -noverifycert";
+        }
+    }
+
     /**
      * Disconnect from mainframe. Destroys all opened Input- and OutputStreams.
      * 
      * @return true if disconnected successful, false otherwise.
+     * @throws FixtureException 
      */
-    public boolean disconnect() {
+    public boolean disconnect() throws FixtureException {
         assertProcessAvailable();
         doQuit();
         stop3270Process();
         try {
             s3270Process.waitFor(5, TimeUnit.SECONDS);
         } catch (final InterruptedException ex) {
-            logger.error("Something went wrong during termination of s2370 process");
+            logger.warn("Something went wrong during termination of s3270 process");
         }
         try {
             in.close();
         } catch (final IOException ex) {
-            logger.error("Something went wrong during closing InputStreamreader of s2370 process");
+            logger.warn("Something went wrong during closing InputStreamreader of s3270 process");
         }
         cleanup();
         boolean success = !isConnected();
         if (success) {
-            logger.info("Disconnected successfully from host : {} ", hostname);
+            logger.debug("Disconnected successfully from host : {} ", hostname);
         } else {
-            logger.info("Discoonection failed");
+            throw new FixtureException("Disconnection failed from host '" + hostname + "'", FixtureException.keyValues("hostname", hostname) );
         }
         return success;
     }
@@ -209,11 +259,11 @@ public class Connection {
         try {
             out.println(commandString);
             out.flush();
-            logger.debug(
+            logger.trace(
                     "************************************************************************************************");
-            logger.debug("---> Command sent: '{}'", command.getActionForLog());
+            logger.trace("---> Command sent: '{}'", command.getActionForLog());
             if (commandString.equals("ascii")) {
-                logger.debug(
+                logger.trace(
                         "--------------0----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8");
             }
             List<String> lines = readOutput();
@@ -221,7 +271,7 @@ public class Connection {
             if (size > 1) {
                 Result result = new Result(lines.subList(0, size - 2), lines.get(size - 2), lines.get(size - 1),
                         offset);
-                logger.debug(
+                logger.trace(
                         "************************************************************************************************");
                 return result;
             } else {

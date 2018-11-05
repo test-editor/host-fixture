@@ -96,7 +96,7 @@ public class Result {
     }
 
     public void logStatus() {
-        logger.debug(getStatus().toString());
+        logger.trace(getStatus().toString());
     }
 
     public String getResultOfCommand() {

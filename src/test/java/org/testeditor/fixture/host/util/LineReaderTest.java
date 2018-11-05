@@ -17,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.locators.LocatorByStartStop;
 import org.testeditor.fixture.host.locators.LocatorByWidth;
 import org.testeditor.fixture.host.s3270.Status;
@@ -33,7 +34,7 @@ public class LineReaderTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void readThreeLinesTest() {
+    public void readThreeLinesTest() throws FixtureException {
         // given
         String expected = " 01/01/2000 14:27:36        AMD MENUE FOR ABCDEFGHIJ          Panelid  - PAN1234"
                 + " Coroneradmin = TROLL                                         Terminal - TM12345"
@@ -52,7 +53,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readTwoLinesTest() {
+    public void readTwoLinesTest() throws FixtureException {
         String expected = "_ ABC         PF 1      ABC                                                     "
                 + "_ DEF         PF 2      DEF";
         String elementLocator = "10;1;11;27";
@@ -69,7 +70,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readMultipleLinesTest() {
+    public void readMultipleLinesTest() throws FixtureException {
 
         // given
         String expected = "ABC         PF 1      ABC                                                     "
@@ -100,7 +101,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readMultipleLinesEndColumnFailureTest() {
+    public void readMultipleLinesEndColumnFailureTest() throws FixtureException {
 
         // given
         int startRow = 0;
@@ -108,7 +109,7 @@ public class LineReaderTest {
         int endRow = 23;
         int endColumn = 81;
 
-        thrown.expect(RuntimeException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen column '81' is greater than the maximum column '80'");
 
         // when
@@ -119,14 +120,14 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readMultipleLinesStartColumnFailureTest() {
+    public void readMultipleLinesStartColumnFailureTest() throws FixtureException {
 
         // given
         int startRow = 1;
         int startColumn = 81;
         int endRow = 23;
         int endColumn = 79;
-        thrown.expect(RuntimeException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen column '81' is greater than the maximum column '80'");
 
         // when
@@ -137,7 +138,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readMultipleLinesRowFailureTest() {
+    public void readMultipleLinesRowFailureTest() throws FixtureException {
 
         // given
         int startRow = 1;
@@ -145,7 +146,7 @@ public class LineReaderTest {
         int endRow = 25;
         int endColumn = 79;
 
-        thrown.expect(RuntimeException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen row '25' is greater than the maximum row '24'");
 
         // when
@@ -155,14 +156,14 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readMultipleLinesStartRowFailureTest() {
+    public void readMultipleLinesStartRowFailureTest() throws FixtureException {
 
         // given
         int startRow = 25;
         int startColumn = 1;
         int endRow = 23;
         int endColumn = 79;
-        thrown.expect(RuntimeException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen row '25' is greater than the maximum row '24'");
 
         // when
@@ -174,7 +175,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readSingleLineStartStopTest() {
+    public void readSingleLineStartStopTest() throws FixtureException {
         // given
         String expected = "Printer";
         int startRow = 3;
@@ -195,7 +196,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readSingleLineWidthTest() {
+    public void readSingleLineWidthTest() throws FixtureException {
 
         // given
         String expected = "Description";
@@ -216,14 +217,14 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readSingleRowFailureTest() throws RuntimeException {
+    public void readSingleRowFailureTest() throws FixtureException {
 
         // given
 
         int startRow = 25;
         int startColumn = 1;
         int width = 8;
-        thrown.expect(RuntimeException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen row width '25' is greater than the actual maximum row width '24'");
         LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offset);
 
@@ -238,7 +239,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readSingleColumnFailureTest() throws RuntimeException {
+    public void readSingleColumnFailureTest() throws FixtureException {
 
         // given
         int startRow = 3;
@@ -255,13 +256,13 @@ public class LineReaderTest {
     }
 
     @Test
-    public void readSingleWidthFailureTest() throws RuntimeException {
+    public void readSingleWidthFailureTest() throws FixtureException {
 
         // given
         int startRow = 1;
         int startColumn = 74;
         int width = 8;
-        thrown.expect(RuntimeException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Your chosen start column plus width '82' is greater than the maximum column size'80'");
         LocatorByWidth locator = new LocatorByWidth(startRow, startColumn, width, status, offset);
         HostScreen hostScreen = new HostScreen();

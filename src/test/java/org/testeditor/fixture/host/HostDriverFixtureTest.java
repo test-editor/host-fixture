@@ -15,10 +15,17 @@ package org.testeditor.fixture.host;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import org.testeditor.fixture.core.FixtureException;
 import org.testeditor.fixture.host.net.Connection;
 import org.testeditor.fixture.host.s3270.Status;
@@ -35,7 +42,7 @@ public class HostDriverFixtureTest {
     private int offsetRow = 1;
     private int offsetColumn = 1;
 
-    @Before
+    @BeforeEach
     public void init() {
         // fixture = mock(HostDriverFixture.class);
         con = mock(Connection.class);
@@ -47,7 +54,7 @@ public class HostDriverFixtureTest {
     public void connectionSuccessfulTest() throws FixtureException {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(con);
         when(con.isConnected()).thenReturn(true);
 
@@ -56,32 +63,38 @@ public class HostDriverFixtureTest {
         Offset offset = new Offset(1, 1);
         Status status = new Status(defaultStatusString, offset);
         when(con.getStatus()).thenReturn(status);
-        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
+        Connection hostConnection =  fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn, false);
 
         // then
-        Assert.assertTrue(connected);
+        Assert.assertNotNull(hostConnection);    
     }
 
     @Test
-    public void connectionUnsuccessfulTest() throws FixtureException {
+    public void connectionUnsuccessfulThrowsFixtureException() throws FixtureException {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-                .thenReturn(con);
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+                .thenReturn(null);
         when(con.isConnected()).thenReturn(false);
 
         // when
-        boolean connected = fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn);
+        // see beneath ;O)
 
         // then
-        Assert.assertFalse(connected);
+        FixtureException exception = Assertions.assertThrows(FixtureException.class, () -> {
+            fixture.connect(S3270_PATH, HOST_URL, HOST_PORT, offsetRow, offsetColumn, false);
+          });
+        Assert.assertEquals("The connection to host 'HOST_URL' on port '1234' could not be established.", exception.getMessage());
+        Map<String, Object> keyValueStore = exception.getKeyValueStore();
+        Assert.assertEquals("HOST_URL", keyValueStore.get("hostname"));
+        Assert.assertEquals(1234, keyValueStore.get("port"));
     }
 
     @Test
-    public void diconnectionSuccessfulTest() throws FixtureException {
+    public void disconnectionSuccessfulTest() throws FixtureException {
 
         // given
-        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(con.connect(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(con);
 
         when(con.disconnect()).thenReturn(true);
@@ -93,17 +106,18 @@ public class HostDriverFixtureTest {
         Assert.assertTrue(disconnected);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void diconnectionUnsuccessfulTest() throws FixtureException {
+    public void disconnectThrowsExceptionTest() throws FixtureException {
 
         // given
         when(con.disconnect()).thenCallRealMethod();
 
         // when
-        boolean disconnected = fixture.disconnect();
+        // see beneath ;O)
 
         // then
-        Assert.assertTrue(disconnected);
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            fixture.disconnect();
+          });
     }
 
 }
