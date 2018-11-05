@@ -35,8 +35,6 @@ import org.testeditor.fixture.host.s3270.options.TerminalMode;
 import org.testeditor.fixture.host.s3270.options.TerminalType;
 import org.testeditor.fixture.host.screen.Offset;
 
-import com.github.jknack.handlebars.Options.Buffer;
-
 public class Connection {
 
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
