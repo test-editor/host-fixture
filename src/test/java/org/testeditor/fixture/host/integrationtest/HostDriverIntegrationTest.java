@@ -128,13 +128,13 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtLocaterStrategyStartTest() throws FixtureException {
+    public void typeIntoLocaterStrategyStartTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, "äöüßabc");
+        hostDriverFixture.typeInto((standardRow + ";" + standardColumn), LocatorStrategy.START, "äöüßabc");
         String actualValue = hostDriverFixture.readValueAt(
                 standardRow + ";" + standardColumn + ";" + standardRow + ";" + (standardColumn + 6),
                 LocatorStrategy.START_STOP);
@@ -145,13 +145,13 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtLocaterStrategyStartStopTest() throws FixtureException {
+    public void typeIntoLocaterStrategyStartStopTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn + ";" + standardRow + ";" + (standardColumn + 7)),
+        hostDriverFixture.typeInto((standardRow + ";" + standardColumn + ";" + standardRow + ";" + (standardColumn + 7)),
                 LocatorStrategy.START_STOP, "äöüßabc");
         String actualValue = hostDriverFixture.readValueAt(
                 standardRow + ";" + standardColumn + ";" + standardRow + ";" + (standardColumn + 6),
@@ -169,7 +169,7 @@ public class HostDriverIntegrationTest {
         // hostDriverFixture in init
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, "äöüßabc");
+        hostDriverFixture.typeInto((standardRow + ";" + standardColumn), LocatorStrategy.START, "äöüßabc");
         String actualValue = hostDriverFixture.readValueAt(standardRow + ";" + standardColumn + ";" + "7",
                 LocatorStrategy.WIDTH);
         // then
@@ -179,7 +179,7 @@ public class HostDriverIntegrationTest {
     }
 
     @Test
-    public void typeAtTestFailure() throws FixtureException {
+    public void typeIntoTestFailure() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -187,7 +187,7 @@ public class HostDriverIntegrationTest {
         // when
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("The field at the position x = '1' and y = '1' is protected.");
-        hostDriverFixture.typeAt("1;1", LocatorStrategy.START, "äöüßabcdefg");
+        hostDriverFixture.typeInto("1;1", LocatorStrategy.START, "äöüßabcdefg");
         // then
         hostDriverFixture.disconnect();
     }
@@ -211,17 +211,17 @@ public class HostDriverIntegrationTest {
         int userPwdColumn = Integer.parseInt(System.getenv("USER_PWD_COLUMN"));
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, user);
-        hostDriverFixture.typeAt((userPwdRow + ";" + userPwdColumn), LocatorStrategy.START, userPwd);
+        hostDriverFixture.typeInto((standardRow + ";" + standardColumn), LocatorStrategy.START, user);
+        hostDriverFixture.typeInto((userPwdRow + ";" + userPwdColumn), LocatorStrategy.START, userPwd);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
-        hostDriverFixture.typeAt((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, testSystem);
+        hostDriverFixture.typeInto((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, testSystem);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
-        hostDriverFixture.typeAt((transactionRow + ";" + transactionColumn), LocatorStrategy.START, transaction);
+        hostDriverFixture.typeInto((transactionRow + ";" + transactionColumn), LocatorStrategy.START, transaction);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         hostDriverFixture.sendCommand(ControlCommand.CLEAR);
-        hostDriverFixture.typeAt((transactionRow + ";" + transactionColumn), LocatorStrategy.START, stoptransaction);
+        hostDriverFixture.typeInto((transactionRow + ";" + transactionColumn), LocatorStrategy.START, stoptransaction);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
-        hostDriverFixture.typeAt((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
+        hostDriverFixture.typeInto((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
 
         // then
@@ -247,8 +247,8 @@ public class HostDriverIntegrationTest {
         int userPwdColumn = Integer.parseInt(System.getenv("USER_PWD_COLUMN"));
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, user);
-        hostDriverFixture.typeAt((userPwdRow + ";" + userPwdColumn), LocatorStrategy.START, userPwd);
+        hostDriverFixture.typeInto((standardRow + ";" + standardColumn), LocatorStrategy.START, user);
+        hostDriverFixture.typeInto((userPwdRow + ";" + userPwdColumn), LocatorStrategy.START, userPwd);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         String actualValue = hostDriverFixture.readValueAt("3;2;3;11", LocatorStrategy.START_STOP);
 
@@ -256,7 +256,7 @@ public class HostDriverIntegrationTest {
         Assert.assertEquals(expectedValue, actualValue);
 
         // stopping the host transaction
-        hostDriverFixture.typeAt((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
+        hostDriverFixture.typeInto((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         hostDriverFixture.disconnect();
     }
@@ -276,8 +276,8 @@ public class HostDriverIntegrationTest {
         int userPwdColumn = Integer.parseInt(System.getenv("USER_PWD_COLUMN"));
 
         // when
-        hostDriverFixture.typeAt((standardRow + ";" + standardColumn), LocatorStrategy.START, user);
-        hostDriverFixture.typeAt((userPwdRow + ";" + userPwdColumn), LocatorStrategy.START, userPwd);
+        hostDriverFixture.typeInto((standardRow + ";" + standardColumn), LocatorStrategy.START, user);
+        hostDriverFixture.typeInto((userPwdRow + ";" + userPwdColumn), LocatorStrategy.START, userPwd);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         String actualValue = hostDriverFixture.readValueAt("3;2;10", LocatorStrategy.WIDTH);
 
@@ -285,13 +285,13 @@ public class HostDriverIntegrationTest {
         Assert.assertEquals(expectedValue, actualValue);
 
         // stopping the host transaction
-        hostDriverFixture.typeAt((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
+        hostDriverFixture.typeInto((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         hostDriverFixture.disconnect();
     }
 
     @Test
-    public void typeAtLocatorStrategyWidthTest() throws FixtureException {
+    public void typeIntoLocatorStrategyWidthTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -307,8 +307,8 @@ public class HostDriverIntegrationTest {
         // when
         String elementlocatorUser = standardRow + ";" + standardColumn + ";0";
         System.out.println(elementlocatorUser);
-        hostDriverFixture.typeAt(elementlocatorUser, LocatorStrategy.WIDTH, user);
-        hostDriverFixture.typeAt(userPwdRow + ";" + userPwdColumn + ";0", LocatorStrategy.WIDTH, userPwd);
+        hostDriverFixture.typeInto(elementlocatorUser, LocatorStrategy.WIDTH, user);
+        hostDriverFixture.typeInto(userPwdRow + ";" + userPwdColumn + ";0", LocatorStrategy.WIDTH, userPwd);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         String actualValue = hostDriverFixture.readValueAt("3;2;10", LocatorStrategy.WIDTH);
 
@@ -316,13 +316,13 @@ public class HostDriverIntegrationTest {
         Assert.assertEquals(expectedValue, actualValue);
 
         // stopping the host transaction
-        hostDriverFixture.typeAt((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
+        hostDriverFixture.typeInto((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         hostDriverFixture.disconnect();
     }
 
     @Test
-    public void typeAtLocatorStrategyStartStopTest() throws FixtureException {
+    public void typeIntoLocatorStrategyStartStopTest() throws FixtureException {
         assumeWindowsAndS3270Accessible();
         // given
         // hostDriverFixture in init
@@ -339,8 +339,8 @@ public class HostDriverIntegrationTest {
         // when
         String elementlocatorUser = standardRow + ";" + standardColumn + ";0;0";
         System.out.println(elementlocatorUser);
-        hostDriverFixture.typeAt(elementlocatorUser, LocatorStrategy.START_STOP, user);
-        hostDriverFixture.typeAt(userPwdRow + ";" + userPwdColumn + ";0;0", LocatorStrategy.START_STOP, userPwd);
+        hostDriverFixture.typeInto(elementlocatorUser, LocatorStrategy.START_STOP, user);
+        hostDriverFixture.typeInto(userPwdRow + ";" + userPwdColumn + ";0;0", LocatorStrategy.START_STOP, userPwd);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         String actualValue = hostDriverFixture.readValueAt("3;2;10", LocatorStrategy.WIDTH);
 
@@ -348,7 +348,7 @@ public class HostDriverIntegrationTest {
         Assert.assertEquals(expectedValue, actualValue);
 
         // stopping the host transaction
-        hostDriverFixture.typeAt((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
+        hostDriverFixture.typeInto((testDefaultRow + ";" + testDefaultColumn), LocatorStrategy.START, stopSystem);
         hostDriverFixture.sendCommand(ControlCommand.ENTER);
         actualValue = hostDriverFixture.readValueAt("3;18;42", LocatorStrategy.WIDTH);
         Assert.assertEquals(expectedValueStart, actualValue);
