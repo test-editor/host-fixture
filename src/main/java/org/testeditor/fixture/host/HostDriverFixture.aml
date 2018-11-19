@@ -24,9 +24,14 @@ interaction type getStatus {
     method = HostDriverFixture.getStatus()
 }
 
-interaction type typeAt {
+interaction type typeInto {
     template = "Enter" ${value} "into" ${element} 
-    method = HostDriverFixture.typeAt(element, locatorStrategy, value)
+    method = HostDriverFixture.typeInto(element, locatorStrategy, value)
+}
+
+interaction type typeConfidentialIntoInsecure {
+    template = "Enter confidential" ${value} "into insecure field " ${element} 
+    method = HostDriverFixture.typeConfidentialIntoInsecure(element, locatorStrategy, value)
 }
 
 interaction type printFieldsOnLog {
@@ -45,6 +50,6 @@ interaction type getValueAt {
 }
 
 component type GeneralHost {
-   interactions = connect, disconnect, getStatus, typeAt, sendCommand, printFieldsOnLog, getValueAt
+   interactions = connect, disconnect, getStatus, typeInto, typeConfidentialIntoInsecure, sendCommand, printFieldsOnLog, getValueAt
 }
 
