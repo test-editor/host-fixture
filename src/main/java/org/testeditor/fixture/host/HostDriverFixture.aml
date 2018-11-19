@@ -29,14 +29,9 @@ interaction type typeInto {
     method = HostDriverFixture.typeInto(element, locatorStrategy, value)
 }
 
-interaction type typeConfidentialInto {
+interaction type typeConfidentialIntoInsecure {
     template = "Enter confidential" ${value} "into insecure field " ${element} 
-    method = HostDriverFixture.typeConfidentialInto(element, locatorStrategy, value)
-}
-
-interaction type typeConfidentialIntoConfidential {
-    template = "Enter confidential " ${value} "into" ${element} 
-    method = HostDriverFixture.typeConfidentialIntoConfidential(element, locatorStrategy, value)
+    method = HostDriverFixture.typeConfidentialIntoInsecure(element, locatorStrategy, value)
 }
 
 interaction type printFieldsOnLog {
@@ -55,6 +50,6 @@ interaction type getValueAt {
 }
 
 component type GeneralHost {
-   interactions = connect, disconnect, getStatus, typeInto, typeConfidentialInto, typeConfidentialIntoConfidential, sendCommand, printFieldsOnLog, getValueAt
+   interactions = connect, disconnect, getStatus, typeInto, typeConfidentialIntoInsecure, sendCommand, printFieldsOnLog, getValueAt
 }
 

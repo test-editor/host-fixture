@@ -238,44 +238,6 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
     
 
     /**
-     * This method should be used when typing a text into password fields because it obfuscates all entries, 
-     * so the password will not be shown plain text in logs.
-     * @param elementLocator
-     *            A String representation of a point to set the cursor on. <br>
-     *            Example: elementLocator = "1;2" (for the
-     *            {@link LocatorStrategy#START}<br>
-     *            1 is the ROW representation and 2 is the COLUMN
-     *            representation.
-     * @param locatorType
-     *          Type of locator for Gui-Widget as enum {@link LocatorStrategy}. This can be START_STOP or just START.
-     *          START_STOP means a range of a field with a beginning point and an end point. 
-     *          START means only the beginning point is given.. 
-     * @param value
-     *            The obfuscated String which should be entered at the given position under
-     *            elementLocator. 
-     * @throws FixtureException 
-     *            When an input field is protected so the user can not reach this field to type something into.
-
-     */
-    @FixtureMethod
-    public void typeConfidentialIntoConfidential(String elementLocator, LocatorStrategy locatorType, MaskingString value) throws FixtureException {
-        Result result = moveCursor(elementLocator, locatorType);
-        result.logStatus();
-        Status status = result.getStatus();
-        if (status.getFieldProtection() == FieldProtection.UNPROTECTED) {
-            waiting(100);
-            Command commandType = new Command("String", "String(\"" + value + "\")");
-            connection.doCommand("String(\"" + value.get() + "\")", commandType);
-            // just to see if typed in successfully.
-            connection.doCommand("ascii", commandAscii);
-        } else {
-            throw new FixtureException("The field at the position x = '" + status.getCurrentCursorColumn() + "' and y = '"
-                    + status.getCurrentCursorRow() + "' is protected.", FixtureException.keyValues("xPosition", 
-                            status.getCurrentCursorColumn(), "yPosition", status.getCurrentCursorRow()));
-        }
-    }    
-    
-    /**
      * Types given text not obfuscated into a non secure input field
      * on a specified Gui-Widget. The specialty about the text which is typed in is, 
      * that it will be not obfuscated in log files
@@ -293,7 +255,7 @@ public class HostDriverFixture implements TestRunListener, TestRunReportable {
  
      */
     @FixtureMethod
-    public void typeConfidentialInto(String elementLocator, LocatorStrategy locatorType, //
+    public void typeConfidentialIntoInsecure(String elementLocator, LocatorStrategy locatorType, //
             MaskingString value) throws FixtureException {
         Result result = moveCursor(elementLocator, locatorType);
         result.logStatus();
